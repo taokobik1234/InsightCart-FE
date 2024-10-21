@@ -3,6 +3,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import HeaderTitle from "../../components/HeaderTitle";
+import { useState } from "react";
 
 const SignUpSchema = yup.object().shape({
   name: yup.string().required("required"),
@@ -18,6 +19,7 @@ const initialValuesSignUp = {
 export default function SignUp() {
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const [errorText, setErrorText] = useState("");
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const handleSignUp = async (values, onSubmitProps) => {
     try {
@@ -33,8 +35,13 @@ export default function SignUp() {
           password: values.password,
         }),
       }).then(response => response.json());
-      console.log(response);
-      onSubmitProps.resetForm();
+      if (response.message !== "Success") {
+        console.log(response);
+        setErrorText(response.message);
+      } else {
+        onSubmitProps.resetForm();
+        navigate(`/auth/verify-request/${values.email}`);
+      }
 
     } catch (error) {
       console.log(error);
@@ -112,6 +119,9 @@ export default function SignUp() {
                     helperText={touched.password && errors.password}
                     sx={{ gridColumn: "span 4" }}
                   />
+                  {errorText && <Box sx={{ gridColumn: "span 4" }}>
+                    <Typography color="red" >{errorText}</Typography>
+                  </Box>}
                 </Box>
                 <Box>
                   <Button
@@ -125,7 +135,7 @@ export default function SignUp() {
                       "&:hover": { Opacity: 0.5 },
                     }}
                   >
-                    LOGIN
+                    Sign Up
                   </Button>
                   <Typography
                     onClick={() => {
@@ -148,6 +158,7 @@ export default function SignUp() {
           </Formik>
         </Box>
       </Box>
+
     </Box>
   )
 }
