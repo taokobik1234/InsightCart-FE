@@ -1,5 +1,5 @@
 import { Box, Typography, useMediaQuery, Button } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import HeaderTitle from "../../components/HeaderTitle";
 import { useEffect } from "react";
 import {
@@ -10,10 +10,13 @@ export default function VerifyRequest() {
     const navigate = useNavigate();
     const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
     const { email } = useParams();
-    console.log(email);
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const type = queryParams.get('type');
+
     const sendVerificationEmail = async () => {
         try {
-            const response = await fetch('http://tancatest.me/api/v1/users/verify-request', {
+            const response = await fetch(`http://tancatest.me/api/v1/users/${type}`, {
                 method: 'POST', // or 'GET' if the API requires
                 headers: {
                     'Content-Type': 'application/json',

@@ -40,7 +40,7 @@ export default function SignUp() {
         setErrorText(response.message);
       } else {
         onSubmitProps.resetForm();
-        navigate(`/auth/verify-request/${values.email}`);
+        navigate(`/auth/verify-request/${values.email}/?type=verify-request`);
       }
 
     } catch (error) {

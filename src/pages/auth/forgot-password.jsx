@@ -17,18 +17,16 @@ export default function ForgotPassword() {
     const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
     const [errorText, setErrorText] = useState("");
     const isNonMobile = useMediaQuery("(min-width:600px)");
-    const handleSignUp = async (values, onSubmitProps) => {
+    const handleSendEmail = async (values, onSubmitProps) => {
         try {
-            const API_URL = "http://tancatest.me/api/v1/users/sign-up"
+            const API_URL = "http://tancatest.me/api/v1/users/forget-password"
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json;charset=UTF-8",
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    name: values.name,
                     email: values.email,
-                    password: values.password,
                 }),
             }).then(response => response.json());
             if (response.message !== "Success") {
@@ -36,7 +34,7 @@ export default function ForgotPassword() {
                 setErrorText(response.message);
             } else {
                 onSubmitProps.resetForm();
-                navigate(`/auth/verify-request/${values.email}`);
+                navigate(`/auth/verify-request/${values.email}?type=forget-password`);
             }
 
         } catch (error) {
@@ -64,7 +62,7 @@ export default function ForgotPassword() {
                 <Box>
 
                     <Formik
-                        onSubmit={handleSignUp}
+                        onSubmit={handleSendEmail}
                         initialValues={initialValuesSignUp}
                         validationSchema={SignUpSchema}
                     >

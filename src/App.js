@@ -7,6 +7,7 @@ import AuthLayout from "./components/auth/AuthLayout";
 import VerifyRequest from "./pages/auth/verify-request";
 import ForgotPassword from "./pages/auth/forgot-password";
 import VerifyEmail from "./pages/auth/verify-email";
+import ResetPassword from "./pages/auth/reset-password";
 function App() {
   return (
     <div className="App">
@@ -19,6 +20,7 @@ function App() {
             <Route path="forgot-password" element={<ForgotPassword />} />
           </Route>
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/home" element={<HomeScreen />} />
         </Routes>
       </BrowserRouter>
