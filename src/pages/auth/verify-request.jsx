@@ -27,7 +27,7 @@ export default function VerifyRequest() {
             if (response.message !== "Success") {
                 console.log(response);
             } else {
-                console.log("response hello");
+                console.log("Send verify email successfully");
             }
 
         } catch (error) {
@@ -37,7 +37,7 @@ export default function VerifyRequest() {
 
     useEffect(() => {
         sendVerificationEmail();
-    }, []);
+    }, [email]);
 
     return (
         <Box>

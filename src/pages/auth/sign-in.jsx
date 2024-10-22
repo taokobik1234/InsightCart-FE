@@ -16,7 +16,6 @@ const initialValuesLogin = {
 const LoginScreen = () => {
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
-  const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const handleSignIn = async (values, onSubmitProps) => {
     try {
@@ -115,6 +114,25 @@ const LoginScreen = () => {
                   >
                     LOGIN
                   </Button>
+                  <Typography
+                    onClick={() => {
+                      navigate("/auth/forgot-password");
+                    }}
+                    sx={{
+                      textDecoration: "underline",
+                      color: "#00D5FA",
+                      "&:hover": {
+                        cursor: "pointer",
+                        color: "#E6FBFF",
+                      },
+                    }}
+                  >
+                    "Forgot Password?"
+                  </Typography>
+
+                  <Typography mt={"10px"} mb={"10px"}>
+                    Or
+                  </Typography>
                   <Typography
                     onClick={() => {
                       navigate("/auth/sign-up");
