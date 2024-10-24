@@ -42,7 +42,7 @@ export default function ResetPassword() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    newpass: values.password
+                    new_password: values.password
                 })
             });
             const data = await response.json();
