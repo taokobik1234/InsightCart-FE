@@ -15,7 +15,7 @@ import CheckAuth from "./components/auth/CheckAuth";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
-  const {isAuthenticated, isLoading} = useSelector(state => state.auth)
+  const {isAuthenticated} = useSelector(state => state.auth)
   useEffect(() => {
     if(!persistAuth) return
     const auth = JSON.parse(persistAuth).auth;
@@ -23,11 +23,10 @@ function App() {
     if (!user) return;
     dispatch(checkAuth({userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId : user.id}));
   }, [persistAuth, dispatch, isAuthenticated]);
-  if(isLoading) return <div>Loading...</div>
   return (
     <div>
+
       <Header />
-      <BrowserRouter>
         <CheckAuth>
         <Routes>
           <Route path="/auth" element={<AuthLayout />} >
@@ -41,7 +40,6 @@ function App() {
           <Route path="/" element={<HomeScreen />} />
         </Routes>
         </CheckAuth>
-      </BrowserRouter>
     </div>
   );
 }

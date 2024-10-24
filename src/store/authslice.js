@@ -2,7 +2,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  isLoading: false,
   user: null,
   isAuthenticated: false,
 };
@@ -36,14 +35,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(checkAuth.fulfilled, (state) => {
-      state.isLoading = false
-    });
-    builder.addCase(checkAuth.pending, (state) => {
-      state.isLoading = true
-    })
     builder.addCase(checkAuth.rejected, (state) => {
-      state.isLoading = false
       state.user = null
       state.isAuthenticated = false
     })
