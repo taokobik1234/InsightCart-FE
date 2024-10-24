@@ -31,7 +31,6 @@ const LoginScreen = () => {
           password: values.password,
         }),
       }).then(response => response.json());
-      console.log(response);
       dispatch(loginSuccess(response.data));
       onSubmitProps.resetForm();
 

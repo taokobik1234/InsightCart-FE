@@ -5,7 +5,12 @@ import MenuItem from '@mui/material/MenuItem';
 import Fade from '@mui/material/Fade';
 import { useState } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
+import {logout} from '../../store/authslice';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 export default function UserMenu() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -37,8 +42,21 @@ export default function UserMenu() {
         onClose={handleClose}
         TransitionComponent={Fade}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem 
+          onClick={() => {
+            navigate('/user/profile') 
+            handleClose()}}
+        >
+          Profile
+        </MenuItem>
+        <MenuItem 
+          onClick={() => {
+            navigate('/user/create-shop') 
+            handleClose()}}
+        >
+          Create your shop
+        </MenuItem>
+        <MenuItem onClick={() => dispatch(logout())}>Logout</MenuItem>
       </Menu>
     </div>
   );

@@ -1,7 +1,10 @@
+import React from 'react'
+
 import { Outlet } from 'react-router-dom'
 
-export default function AuthLayout() {
+export default function UserLayout() {
   return (
     <Outlet/>
   )
 }
+

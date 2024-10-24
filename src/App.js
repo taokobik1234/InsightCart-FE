@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LoginScreen from "./pages/auth/sign-in";
 import SignUp from "./pages/auth/sign-up";
 import HomeScreen from "./pages";
@@ -12,6 +12,9 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/authslice";
 import CheckAuth from "./components/auth/CheckAuth";
+import UserLayout from "./components/user/UserLayout";
+import Profile from "./pages/user/profile";
+import CreateShop from "./pages/user/create-shop";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
@@ -29,6 +32,10 @@ function App() {
       <Header />
         <CheckAuth>
         <Routes>
+          <Route path='/user' element={<UserLayout />} >
+            <Route path="profile" element={<Profile />} />
+            <Route path="create-shop" element={<CreateShop />} />
+          </Route>
           <Route path="/auth" element={<AuthLayout />} >
             <Route path="sign-in" element={<LoginScreen />} />
             <Route path="sign-up" element={<SignUp />} />
