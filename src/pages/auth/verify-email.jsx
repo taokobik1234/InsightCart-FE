@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import HeaderTitle from "../../components/HeaderTitle";
 import {
     ArrowForward
 } from "@mui/icons-material";
@@ -21,7 +20,7 @@ function VerifyEmail() {
         if (token) {
             verifyToken(token);
         }
-    }, []);
+    }, [location.search]);
 
     const verifyToken = async (token) => {
         try {
@@ -44,8 +43,6 @@ function VerifyEmail() {
 
     return (
         <Box>
-            <HeaderTitle />
-
             <Box
                 width={isNonMobileScreens ? "50%" : "93%"}
                 p="2rem"

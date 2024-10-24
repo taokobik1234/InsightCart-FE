@@ -1,11 +1,10 @@
 
 import React from 'react'
-import HeaderTitle from '../../components/HeaderTitle'
 import { Box, Typography, useMediaQuery, TextField, Button, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 const SignUpSchema = yup.object().shape({
     password: yup.string().required("required"),
@@ -15,7 +14,6 @@ const initialValuesSignUp = {
     email: "",
 };
 export default function ResetPassword() {
-    const navigate = useNavigate();
     const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [errorText, setErrorText] = useState("");
@@ -57,7 +55,6 @@ export default function ResetPassword() {
     };
     return (
         <Box>
-            <HeaderTitle />
             <Box
                 width={isNonMobileScreens ? "50%" : "93%"}
                 p="2rem"

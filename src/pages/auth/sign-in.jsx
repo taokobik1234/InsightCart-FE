@@ -2,8 +2,8 @@ import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import HeaderTitle from "../../components/HeaderTitle";
-
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../store/authslice";
 const loginSchema = yup.object().shape({
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
@@ -14,6 +14,7 @@ const initialValuesLogin = {
   password: "",
 };
 const LoginScreen = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
 
@@ -31,6 +32,7 @@ const LoginScreen = () => {
         }),
       }).then(response => response.json());
       console.log(response);
+      dispatch(loginSuccess(response.data));
       onSubmitProps.resetForm();
 
     } catch (error) {
@@ -39,8 +41,6 @@ const LoginScreen = () => {
   }
   return (
     <Box>
-      <HeaderTitle />
-
       <Box
         width={isNonMobileScreens ? "50%" : "93%"}
         p="2rem"

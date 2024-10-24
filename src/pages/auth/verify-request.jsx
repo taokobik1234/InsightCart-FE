@@ -1,7 +1,6 @@
 import { Box, Typography, useMediaQuery, Button } from "@mui/material";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import HeaderTitle from "../../components/HeaderTitle";
-import { useEffect } from "react";
+import { useCallback } from "react";
 import {
     ArrowForward
 } from "@mui/icons-material";
@@ -14,7 +13,7 @@ export default function VerifyRequest() {
     const queryParams = new URLSearchParams(location.search);
     const type = queryParams.get('type');
 
-    const sendVerificationEmail = async () => {
+    const sendVerificationEmail = useCallback(async () => {
         try {
             const response = await fetch(`http://tancatest.me/api/v1/users/${type}`, {
                 method: 'POST', // or 'GET' if the API requires
@@ -36,16 +35,11 @@ export default function VerifyRequest() {
         } catch (error) {
             console.log(error);
         }
-    };
-
-    useEffect(() => {
-        sendVerificationEmail();
-    }, [email]);
+    }, [email, type]);
+    sendVerificationEmail();
 
     return (
         <Box>
-            <HeaderTitle />
-
             <Box
                 width={isNonMobileScreens ? "50%" : "93%"}
                 p="2rem"
