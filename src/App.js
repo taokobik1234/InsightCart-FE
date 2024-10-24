@@ -8,11 +8,27 @@ import ForgotPassword from "./pages/auth/forgot-password";
 import VerifyEmail from "./pages/auth/verify-email";
 import ResetPassword from "./pages/auth/reset-password";
 import Header from "./components/Header";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuth } from "./store/authslice";
+import CheckAuth from "./components/auth/CheckAuth";
 function App() {
+  const persistAuth = localStorage.getItem("persist:auth");
+  const dispatch = useDispatch();
+  const {isAuthenticated, isLoading} = useSelector(state => state.auth)
+  useEffect(() => {
+    if(!persistAuth) return
+    const auth = JSON.parse(persistAuth).auth;
+    const user = JSON.parse(auth).user;
+    if (!user) return;
+    dispatch(checkAuth({userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId : user.id}));
+  }, [persistAuth, dispatch, isAuthenticated]);
+  if(isLoading) return <div>Loading...</div>
   return (
     <div>
       <Header />
       <BrowserRouter>
+        <CheckAuth>
         <Routes>
           <Route path="/auth" element={<AuthLayout />} >
             <Route path="sign-in" element={<LoginScreen />} />
@@ -24,6 +40,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<HomeScreen />} />
         </Routes>
+        </CheckAuth>
       </BrowserRouter>
     </div>
   );

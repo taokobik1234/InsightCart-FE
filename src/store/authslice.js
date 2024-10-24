@@ -1,11 +1,27 @@
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  isLoading: false,
   user: null,
   isAuthenticated: false,
 };
-
+export const checkAuth = createAsyncThunk('auth/getUser', async ({userId, sessionId, token, clientId}, {rejectWithValue}) => {
+  const response = await fetch(`http://tancatest.me/api/v1/users/${userId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'session-id': sessionId,
+      'Authorization': `Bearer ${token}`,
+      'x-client-id': clientId
+    },
+  }).then(response => response.json())
+  .catch(error => {
+    console.log(error)
+    return rejectWithValue(error)
+  })
+  return response.data
+  
+})
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -19,6 +35,19 @@ const authSlice = createSlice({
       state.user = null;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(checkAuth.fulfilled, (state) => {
+      state.isLoading = false
+    });
+    builder.addCase(checkAuth.pending, (state) => {
+      state.isLoading = true
+    })
+    builder.addCase(checkAuth.rejected, (state) => {
+      state.isLoading = false
+      state.user = null
+      state.isAuthenticated = false
+    })
+  }
 });
 
 export const { loginSuccess, logout } = authSlice.actions;
