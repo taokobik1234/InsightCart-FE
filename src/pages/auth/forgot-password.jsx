@@ -2,7 +2,6 @@ import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import HeaderTitle from "../../components/HeaderTitle";
 import { useState } from "react";
 
 const SignUpSchema = yup.object().shape({
@@ -43,8 +42,6 @@ export default function ForgotPassword() {
     }
     return (
         <Box>
-            <HeaderTitle />
-
             <Box
                 width={isNonMobileScreens ? "50%" : "93%"}
                 p="2rem"

@@ -2,7 +2,6 @@ import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import HeaderTitle from "../../components/HeaderTitle";
 import { useState } from "react";
 
 const SignUpSchema = yup.object().shape({
@@ -40,7 +39,7 @@ export default function SignUp() {
         setErrorText(response.message);
       } else {
         onSubmitProps.resetForm();
-        navigate(`/auth/verify-request/${values.email}/?type=verify-request`);
+        navigate(`/auth/verify-request/${values.email}?type=verify-request`);
       }
 
     } catch (error) {
@@ -49,8 +48,6 @@ export default function SignUp() {
   }
   return (
     <Box>
-      <HeaderTitle />
-
       <Box
         width={isNonMobileScreens ? "50%" : "93%"}
         p="2rem"
