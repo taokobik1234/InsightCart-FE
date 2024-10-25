@@ -55,7 +55,7 @@ export default function SignUp() {
         borderRadius="1.5rem"
         backgroundColor={"#F0F0F0"}
       >
-        <Typography fontWeight="500" variant="h5" sx={{ mb: "20px" }}>
+        <Typography align="center" fontWeight="500" variant="h5" sx={{ mb: "20px" }}>
           Sign Up
         </Typography>
         {/* <Form /> */}
@@ -135,6 +135,7 @@ export default function SignUp() {
                     Sign Up
                   </Button>
                   <Typography
+                    align="center"
                     onClick={() => {
                       navigate("/auth/sign-in");
                     }}

@@ -31,6 +31,7 @@ const LoginScreen = () => {
           password: values.password,
         }),
       }).then(response => response.json());
+      console.log(response);
       dispatch(loginSuccess(response.data));
       onSubmitProps.resetForm();
 
@@ -114,6 +115,7 @@ const LoginScreen = () => {
                     LOGIN
                   </Button>
                   <Typography
+                    align="center"
                     onClick={() => {
                       navigate("/auth/forgot-password");
                     }}
@@ -129,10 +131,11 @@ const LoginScreen = () => {
                     "Forgot Password?"
                   </Typography>
 
-                  <Typography mt={"10px"} mb={"10px"}>
+                  <Typography mt={"10px"} mb={"10px"} align="center">
                     Or
                   </Typography>
                   <Typography
+                    align="center"
                     onClick={() => {
                       navigate("/auth/sign-up");
                     }}
