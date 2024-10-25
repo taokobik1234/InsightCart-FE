@@ -30,8 +30,12 @@ const LoginScreen = () => {
           email: values.email,
           password: values.password,
         }),
-      }).then(response => response.json());
-      console.log(response);
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
       dispatch(loginSuccess(response.data));
       onSubmitProps.resetForm();
 
