@@ -28,9 +28,8 @@ function App() {
   }, [persistAuth, dispatch, isAuthenticated]);
   return (
     <div>
-
-      <Header />
         <CheckAuth>
+        <Header />
         <Routes>
           <Route path='/user' element={<UserLayout />} >
             <Route path="profile" element={<Profile />} />
