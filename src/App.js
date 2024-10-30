@@ -15,25 +15,27 @@ import CheckAuth from "./components/auth/CheckAuth";
 import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
 import CreateShop from "./pages/user/create-shop";
+import Notification from "./pages/user/notification";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
-  const {isAuthenticated} = useSelector(state => state.auth)
+  const { isAuthenticated } = useSelector(state => state.auth)
   useEffect(() => {
-    if(!persistAuth) return
+    if (!persistAuth) return
     const auth = JSON.parse(persistAuth).auth;
     const user = JSON.parse(auth).user;
     if (!user) return;
-    dispatch(checkAuth({userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId : user.id}));
+    dispatch(checkAuth({ userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId: user.id }));
   }, [persistAuth, dispatch, isAuthenticated]);
   return (
     <div>
-        <CheckAuth>
+      <CheckAuth>
         <Header />
         <Routes>
           <Route path='/user' element={<UserLayout />} >
             <Route path="profile" element={<Profile />} />
             <Route path="create-shop" element={<CreateShop />} />
+            <Route path="notification" element={<Notification />} />
           </Route>
           <Route path="/auth" element={<AuthLayout />} >
             <Route path="sign-in" element={<LoginScreen />} />
@@ -45,7 +47,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<HomeScreen />} />
         </Routes>
-        </CheckAuth>
+      </CheckAuth>
     </div>
   );
 }
