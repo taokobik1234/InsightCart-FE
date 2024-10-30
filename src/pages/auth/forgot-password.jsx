@@ -41,7 +41,7 @@ export default function ForgotPassword() {
         }
     }
     return (
-        <Box>
+        <Box mt={"100px"}>
             <Box
                 width={isNonMobileScreens ? "50%" : "93%"}
                 p="2rem"

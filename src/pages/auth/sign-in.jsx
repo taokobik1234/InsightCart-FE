@@ -4,6 +4,7 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authslice";
+import { useState } from "react";
 const loginSchema = yup.object().shape({
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
@@ -17,7 +18,7 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
-
+  const [errorText, setErrorText] = useState("");
   const handleSignIn = async (values, onSubmitProps) => {
     try {
       const API_URL = "http://tancatest.me/api/v1/users/sign-in"
@@ -32,6 +33,7 @@ const LoginScreen = () => {
         }),
       }).then(response => {
         if (!response.ok) {
+          setErrorText(response.statusText);
           throw new Error(response.statusText);
         }
         return response.json();
@@ -44,7 +46,7 @@ const LoginScreen = () => {
     }
   }
   return (
-    <Box>
+    <Box mt={"100px"}>
       <Box
         width={isNonMobileScreens ? "50%" : "93%"}
         p="2rem"
@@ -103,6 +105,9 @@ const LoginScreen = () => {
                     helperText={touched.password && errors.password}
                     sx={{ gridColumn: "span 4" }}
                   />
+                  {errorText && <Box sx={{ gridColumn: "span 4" }}>
+                    <Typography color="red" >{errorText}</Typography>
+                  </Box>}
                 </Box>
                 <Box>
                   <Button
