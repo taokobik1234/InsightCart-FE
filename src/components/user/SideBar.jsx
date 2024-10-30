@@ -6,10 +6,11 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-
-const drawerWidth = 240;
-
+import useMediaQuery from '@mui/material/useMediaQuery';
 const Sidebar = () => {
+    const isTablet = useMediaQuery('(max-width: 950px)');
+    const isNonMobile = useMediaQuery('(max-width: 600px)');
+    const drawerWidth = isNonMobile ? '0' : isTablet ? '200px' : '240px';
     return (
         <Drawer
             variant="permanent"
