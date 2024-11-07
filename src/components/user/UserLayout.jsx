@@ -6,7 +6,7 @@ export default function UserLayout() {
   const { isAuthenticated } = useSelector(state => state.auth)
   return (
     <div>
-      <Outlet />
+      {isAuthenticated ? <Outlet /> : null}
       {isAuthenticated ? <Sidebar /> : null}
     </div>
   )
