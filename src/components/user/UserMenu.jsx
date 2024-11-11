@@ -22,7 +22,7 @@ export default function UserMenu() {
   
 
   return (
-    <div>
+    <div className='bg-white'>
       <Button
         id="fade-button"
         aria-controls={open ? 'fade-menu' : undefined}
