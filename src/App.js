@@ -16,6 +16,7 @@ import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
 import CreateShop from "./pages/user/create-shop";
 import Notification from "./pages/user/notification";
+import Footer from "./components/Footer";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<HomeScreen />} />
         </Routes>
+        <Footer />
       </CheckAuth>
     </div>
   );

@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Fade from '@mui/material/Fade';
 import { useState } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
-import {logout} from '../../store/authslice';
+import { logout } from '../../store/authslice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 export default function UserMenu() {
@@ -19,7 +19,7 @@ export default function UserMenu() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  
+
 
   return (
     <div className='bg-white'>
@@ -30,7 +30,7 @@ export default function UserMenu() {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        <CiMenuBurger size={30} color='black'/>
+        <CiMenuBurger size={20} color='black' />
       </Button>
       <Menu
         id="fade-menu"
@@ -42,17 +42,19 @@ export default function UserMenu() {
         onClose={handleClose}
         TransitionComponent={Fade}
       >
-        <MenuItem 
+        <MenuItem
           onClick={() => {
-            navigate('/user/profile') 
-            handleClose()}}
+            navigate('/user/profile')
+            handleClose()
+          }}
         >
           Profile
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           onClick={() => {
-            navigate('/user/create-shop') 
-            handleClose()}}
+            navigate('/user/create-shop')
+            handleClose()
+          }}
         >
           Create your shop
         </MenuItem>

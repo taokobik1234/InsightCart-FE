@@ -1,7 +1,11 @@
 
 function HomeScreen() {
     return (
-        <div>HomeScreen</div>
+        <div>
+            <p>trollll</p>
+        </div>
+
+
     )
 }
 
