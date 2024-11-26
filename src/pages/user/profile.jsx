@@ -1,7 +1,6 @@
 import React from 'react';
 import { TextField, Button, FormControlLabel, Radio, RadioGroup, FormLabel, Box, Typography } from '@mui/material';
 import ImageUpload from '../../components/user/ImageUpload';
-import FlexBetween from '../../components/ui/FlexBetween';
 import { useMediaQuery } from '@mui/material';
 import { useSelector } from 'react-redux';
 export default function Profile() {
@@ -16,7 +15,7 @@ export default function Profile() {
       p="2rem"
       m="2rem auto"
       borderRadius="1.5rem"
-      backgroundColor={"#F0F0F0"} mt={"100px"}>
+      backgroundColor={"#fff"} mt={"100px"}>
       <Box mr={"2rem"}>
         <Typography variant="h6" gutterBottom>
           My profile

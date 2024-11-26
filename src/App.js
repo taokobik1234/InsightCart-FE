@@ -17,6 +17,7 @@ import Profile from "./pages/user/profile";
 import CreateShop from "./pages/user/create-shop";
 import Notification from "./pages/user/notification";
 import Footer from "./components/Footer";
+import About from "./pages/about";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
@@ -32,22 +33,25 @@ function App() {
     <div>
       <CheckAuth>
         <Header />
-        <Routes>
-          <Route path='/user' element={<UserLayout />} >
-            <Route path="profile" element={<Profile />} />
-            <Route path="create-shop" element={<CreateShop />} />
-            <Route path="notification" element={<Notification />} />
-          </Route>
-          <Route path="/auth" element={<AuthLayout />} >
-            <Route path="sign-in" element={<LoginScreen />} />
-            <Route path="sign-up" element={<SignUp />} />
-            <Route path="verify-request/:email" element={<VerifyRequest />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
-          </Route>
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<HomeScreen />} />
-        </Routes>
+        <div className="min-h-screen">
+          <Routes>
+            <Route path='/user' element={<UserLayout />} >
+              <Route path="profile" element={<Profile />} />
+              <Route path="create-shop" element={<CreateShop />} />
+              <Route path="notification" element={<Notification />} />
+            </Route>
+            <Route path="/auth" element={<AuthLayout />} >
+              <Route path="sign-in" element={<LoginScreen />} />
+              <Route path="sign-up" element={<SignUp />} />
+              <Route path="verify-request/:email" element={<VerifyRequest />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
+            </Route>
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </div>
         <Footer />
       </CheckAuth>
     </div>
