@@ -73,7 +73,35 @@ export default function CreateShop() {
       console.log(error);
     }
   }
-  
+  useEffect(() => {
+    if(!user.id || !user.session_id || !user.token.AccessToken) return
+    const fetchShop = async () => {
+      try {
+        const shopId = await fetch(`http://tancatest.me/api/v1/shops/get-shop-id-by-user-id/${user.id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'session-id': user.session_id,
+            'Authorization': `Bearer ${user.token.AccessToken}`,
+            'x-client-id': user.id
+          },
+        }).then(response => response.json())
+        .then(response => response.data)
+        const shop = await fetch(`http://tancatest.me/api/v1/shops/${shopId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'session-id': user.session_id,
+            'Authorization': `Bearer ${user.token.AccessToken}`,
+            'x-client-id': user.id
+          },
+        }).then(response => response.json())
+        .then(response => response.data)
+        console.log(shop)
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchShop()
+  }, []);
   return (
     <Box>
       <Box
