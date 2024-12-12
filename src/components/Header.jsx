@@ -1,11 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './user/UserMenu';
 import { TiShoppingCart } from "react-icons/ti";
 export default function Header() {
   const { isAuthenticated } = useSelector(state => state.auth);
-
+  const location = useLocation()
+  if(location.pathname.includes("/admin")) return null
   return (
     <nav className="bg-blue border-gray-200 dark:bg-gray-900 border-b-2 border-solid">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">

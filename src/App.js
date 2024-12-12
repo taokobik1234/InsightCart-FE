@@ -18,17 +18,20 @@ import CreateShop from "./pages/user/create-shop";
 import Notification from "./pages/user/notification";
 import Footer from "./components/Footer";
 import About from "./pages/about";
+import AdminScreen from "./pages/admin";
+import AdminLayout from "./components/admin/AdminLayout";
+import ShopVerify from "./pages/admin/shop-verify";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector(state => state.auth)
+  const { isAuthenticated} = useSelector(state => state.auth)
   useEffect(() => {
     if (!persistAuth) return
     const auth = JSON.parse(persistAuth).auth;
     const user = JSON.parse(auth).user;
     if (!user) return;
     dispatch(checkAuth({ userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId: user.id }));
-  }, [persistAuth, dispatch, isAuthenticated]);
+  }, [persistAuth, dispatch, isAuthenticated, checkAuth]);
   return (
     <div>
       <CheckAuth>
@@ -45,6 +48,10 @@ function App() {
               <Route path="sign-up" element={<SignUp />} />
               <Route path="verify-request/:email" element={<VerifyRequest />} />
               <Route path="forgot-password" element={<ForgotPassword />} />
+            </Route>
+            <Route path="/admin" element={<AdminLayout />} >
+              <Route index element={<AdminScreen />} />
+              <Route path="shop-verify" element={<ShopVerify />} />
             </Route>
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />

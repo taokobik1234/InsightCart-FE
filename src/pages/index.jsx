@@ -6,7 +6,6 @@ function HomeScreen() {
         "https://wallpaperaccess.com/full/809523.jpg",
         "https://getwallpapers.com/wallpaper/full/5/c/0/606489.jpg",
     ];
-
     return (
         <div className="w-[50%] m-auto pt-11">
             <Carousel slides={slides} />
