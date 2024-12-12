@@ -21,6 +21,23 @@ export default function ShopVerify() {
         const formattedDate = date.toLocaleString('en-US', options);
         return formattedDate;
     }
+    const handleAccept = async (id) => {
+        await fetch('http://tancatest.me/api/v1/admin/verify-shop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'session-id': user.session_id,
+                'Authorization': `Bearer ${user.token.AccessToken}`,
+                'x-client-id': user.id
+            },
+            body: JSON.stringify({
+                ids: [id]
+            })
+        })
+    }
+    const handleReject = async (id) => {
+        console.log(id);
+    }
     useEffect(() => {
         const fetchShops = async () => {
             try {
@@ -56,8 +73,8 @@ export default function ShopVerify() {
                         <p className='text-[8px] text-slate-500 font-light'>{convertDate(request.created_at)}</p>
                     </div>
                     <div className='flex flex-row items-center gap-3'>
-                        <FaCheck color='green' size={25} className='cursor-pointer'/>
-                        <TbXboxXFilled color='red' size={25} className='cursor-pointer'/>
+                        <FaCheck color='green' size={25} className='cursor-pointer' onClick={() => handleAccept(request.id)}/>
+                        <TbXboxXFilled color='red' size={25} className='cursor-pointer' onClick={() => handleReject(request.id)}/>
                     </div>
                 </div>
             ))}
