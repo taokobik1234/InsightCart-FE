@@ -3,6 +3,13 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import { FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import neyMar from '../assets/neymar.jpg'
+import ronaldo from '../assets/ronaldo.jpg'
+import messi from '../assets/messi.jpg'
+import kevin from '../assets/kevin.jpg'
+import pogba from '../assets/pogba.jpg'
+import ServiceCard from '../components/ServiceCard';
 export default function About() {
     return (
         <div className="flex flex-col w-full mt-10 mb-20">
@@ -32,7 +39,7 @@ export default function About() {
                     <div className="text-gray-600">Sellers active our site</div>
                 </div>
 
-                <div className="bg-red-500 p-4 shadow-md flex flex-col items-center justify-center text-white w-1/5">
+                <div className="bg-blue-500 p-4 shadow-md flex flex-col items-center justify-center text-white w-1/5">
                     <div class="bg-gray-300 p-2 rounded-full mb-2">
                         <div class="bg-white text-black p-2 rounded-full">
                             <AttachMoneyIcon color='black' />
@@ -64,6 +71,103 @@ export default function About() {
                     <div className="text-gray-600">Annual gross sale in our site</div>
                 </div>
             </div>
+
+            <div class="flex flex-wrap-reverse justify-center gap-8 bg-gray-50 p-8 mt-20">
+
+                <div class="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
+                    <img src={ronaldo} alt="Tom Cruise" class="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />
+                    <h2 class="text-lg font-bold">Ro Nguyen</h2>
+                    <p class="text-gray-600 text-sm">Co-founder</p>
+                    <div class="flex justify-center space-x-4 mt-4">
+
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaTwitter size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaInstagram size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaLinkedinIn size={20} />
+                        </a>
+                    </div>
+                </div>
+
+                <div class="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
+                    <img src={messi} alt="Tom Cruise" class="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />
+                    <h2 class="text-lg font-bold">Si Vo</h2>
+                    <p class="text-gray-600 text-sm">Product designer</p>
+                    <div class="flex justify-center space-x-4 mt-4">
+
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaTwitter size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaInstagram size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaLinkedinIn size={20} />
+                        </a>
+                    </div>
+                </div>
+
+                <div class="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
+                    <img src={kevin} alt="Tom Cruise" class="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />
+                    <h2 class="text-lg font-bold">Duy Kevin</h2>
+                    <p class="text-gray-600 text-sm">Founder & Chairman</p>
+                    <div class="flex justify-center space-x-4 mt-4">
+
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaTwitter size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaInstagram size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaLinkedinIn size={20} />
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
+                    <img src={pogba} alt="Emma Watson" class="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />
+                    <h2 class="text-lg font-bold">Dung Pogba</h2>
+                    <p class="text-gray-600 text-sm">Managing Director</p>
+                    <div class="flex justify-center space-x-4 mt-4">
+
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaTwitter size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaInstagram size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaLinkedinIn size={20} />
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
+                    <img src={neyMar} alt="Will Smith" class="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />
+                    <h2 class="text-lg font-bold">Thinh Neymar</h2>
+                    <p class="text-gray-600 text-sm">Founder & Chairman</p>
+                    <div class="flex justify-center space-x-4 mt-4">
+
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaTwitter size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaInstagram size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100009724477964" className="hover:text-black hover:scale-110">
+                            <FaLinkedinIn size={20} />
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <ServiceCard />
         </div>
 
 

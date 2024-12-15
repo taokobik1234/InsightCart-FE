@@ -20,6 +20,10 @@ export default function UserMenu() {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
 
   return (
     <div className='bg-white'>
@@ -58,7 +62,7 @@ export default function UserMenu() {
         >
           Create your shop
         </MenuItem>
-        <MenuItem onClick={() => dispatch(logout())}>Logout</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
   );
