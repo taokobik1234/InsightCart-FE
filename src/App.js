@@ -21,10 +21,11 @@ import About from "./pages/about";
 import AdminScreen from "./pages/admin";
 import AdminLayout from "./components/admin/AdminLayout";
 import ShopVerify from "./pages/admin/shop-verify";
+import Contact from "./pages/contact";
 function App() {
   const persistAuth = localStorage.getItem("persist:auth");
   const dispatch = useDispatch();
-  const { isAuthenticated} = useSelector(state => state.auth)
+  const { isAuthenticated } = useSelector(state => state.auth)
   useEffect(() => {
     if (!persistAuth) return
     const auth = JSON.parse(persistAuth).auth;
@@ -57,6 +58,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<HomeScreen />} />
             <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </div>
         <Footer />

@@ -1,7 +1,6 @@
 import React from 'react';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import GppGoodIcon from '@mui/icons-material/GppGood';
 
 export default function ServiceCard() {
