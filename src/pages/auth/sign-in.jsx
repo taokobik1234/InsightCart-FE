@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authslice";
 import { useState } from "react";
+import { checkAuth } from "../../store/userslice";
 const loginSchema = yup.object().shape({
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
@@ -39,6 +40,7 @@ const LoginScreen = () => {
         return response.json();
       })
       dispatch(loginSuccess(response.data));
+      dispatch(checkAuth({ userId: response.data.id, sessionId: response.data.session_id, token: response.data.token.AccessToken, clientId: response.data.id }));
       onSubmitProps.resetForm();
 
     } catch (error) {

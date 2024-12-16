@@ -5,7 +5,9 @@ import { useMediaQuery } from '@mui/material';
 import { useSelector } from 'react-redux';
 export default function Profile() {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
-  const user = useSelector(state => state.auth.user)
+  const userAuth = useSelector(state => state.auth.user)
+  const user = useSelector(state => state.user.user)
+
   console.log(user);
   return (
     <Box
@@ -23,8 +25,8 @@ export default function Profile() {
         <TextField
           margin="normal"
           fullWidth
-          label="Tên"
-          defaultValue={user.username}
+          label="Name"
+          defaultValue={user.name}
         />
         <TextField
           margin="normal"
@@ -38,7 +40,7 @@ export default function Profile() {
         <TextField
           margin="normal"
           fullWidth
-          label="Số điện thoại"
+          label="Phone Number"
           defaultValue="*******41"
         />
         <FormLabel component="legend">Giới tính</FormLabel>
@@ -62,10 +64,10 @@ export default function Profile() {
           color="primary"
           sx={{ mt: 2 }}
         >
-          Lưu
+          Save
         </Button>
       </Box>
-      <ImageUpload />
+      <ImageUpload avatar={user.avatar ? user.avatar : ""} />
     </Box>
   );
 }

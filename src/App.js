@@ -10,7 +10,7 @@ import ResetPassword from "./pages/auth/reset-password";
 import Header from "./components/Header";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth } from "./store/authslice";
+import { setUser, checkAuth } from "./store/userslice";
 import CheckAuth from "./components/auth/CheckAuth";
 import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
@@ -23,7 +23,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import ShopVerify from "./pages/admin/shop-verify";
 import Contact from "./pages/contact";
 function App() {
-  const persistAuth = localStorage.getItem("persist:auth");
+  const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector(state => state.auth)
   useEffect(() => {
@@ -31,7 +31,6 @@ function App() {
     const auth = JSON.parse(persistAuth).auth;
     const user = JSON.parse(auth).user;
     if (!user) return;
-    dispatch(checkAuth({ userId: user.id, sessionId: user.session_id, token: user.token.AccessToken, clientId: user.id }));
   }, [persistAuth, dispatch, isAuthenticated, checkAuth]);
   return (
     <div>
