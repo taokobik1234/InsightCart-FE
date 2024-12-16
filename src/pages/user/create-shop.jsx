@@ -1,7 +1,7 @@
 import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material";
 import {    Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
-
+import DotLoader from '../../components/ui/DotLoader';
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom"; 
@@ -28,10 +28,11 @@ const initialValuesSignUp = {
 };
 export default function CreateShop() {
   const {user} = useSelector(state => state.auth)
- 
+  const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate(); 
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [errorText, setErrorText] = useState("");
+  const [shop, setShop] = useState(); 
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [open, setOpen] = useState(false); 
   const handleClickOpen = () => {
@@ -96,12 +97,19 @@ export default function CreateShop() {
         }).then(response => response.json())
         .then(response => response.data)
         console.log(shop)
+        setShop(shop) 
+        setIsLoading(true) 
       } catch (error) {
         console.log(error);
       }
     }
     fetchShop()
   }, []);
+  if(!isLoading)
+    return( 
+        DotLoader()  
+    )  
+  if(!shop) 
   return (
     <Box>
       <Box
@@ -247,6 +255,56 @@ export default function CreateShop() {
                 
     </Box>
   )
+  if(shop)
+  return (
+   <Box
+  display="flex"
+  justifyContent="center"
+  alignItems="center"
+  height="80vh"  
+  bgcolor="#f9f9f9"  
+>
+  <Box
+    width={isNonMobileScreens ? "50%" : "93%"}
+    p="2rem"
+    borderRadius="1.5rem"
+    backgroundColor="#F0F0F0"
+    textAlign="center"
+  >
+    <Typography
+      fontWeight="800"
+      variant="h4"
+      sx={{ mb: "20px" }}
+      fontFamily="bold"
+    >
+      {shop.is_verified === false
+        ? "Your shop is awaiting approval."
+        : "You already have a shop."}
+    </Typography>
+    <Box
+      display="flex"
+      justifyContent="center"
+      gap="40px"
+      flexDirection="row"
+      mt="2rem"
+    >
+      <Button
+        onClick={() => navigate("/auth/sign-in")}
+        sx={{
+          p: "1rem 2rem",
+          backgroundColor: "#00D5FA",
+          color: "#FFFFFF",
+          fontWeight: "600",
+        }}
+      >
+        Return
+      </Button>
+    </Box>
+  </Box>
+</Box>
+
+ ) 
+  
 }
 // src/MapComponent.js
  
