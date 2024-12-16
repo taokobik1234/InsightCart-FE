@@ -278,7 +278,7 @@ export default function CreateShop() {
       fontFamily="bold"
     >
       {shop.is_verified === false
-        ? "Your shop is awaiting approval."
+        ? "Your shop is awaiting approval ..."
         : "You already have a shop."}
     </Typography>
     <Box
@@ -318,13 +318,13 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapComponent = (   {setFieldValue} ) => {
-  const [position, setPosition] = useState([21.0285, 105.8542]); // Default to Hanoi, Vietnam
+  const [position, setPosition] = useState(); // Default to Hanoi, Vietnam
   const [number, setNumber] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState(''); 
   const [district, setDistrict] = useState('');
   const [address, setAddress] = useState('');
-  
+  const [isLoading,setIsLoading]= useState(false);
   // Use effect to get user's current position
   useEffect(() => {
     if (navigator.geolocation) {
@@ -343,7 +343,7 @@ const MapComponent = (   {setFieldValue} ) => {
           timeout: 5000,
           maximumAge: 0,
         }
-      );
+      );  
     } else {
       console.error("Geolocation is not supported by this browser.");
     }
@@ -388,10 +388,7 @@ const MapComponent = (   {setFieldValue} ) => {
       const formattedAddress = `${number} ${street}, ${district}, ${city}`;
   
       // Set the extracted fields in the component's state
-      setNumber(number);
-      setStreet(street);
-      setCity(city);
-      setDistrict(district);
+      
       setFieldValue("street", street); 
       setFieldValue("district", district); 
       setFieldValue("city", city);    
@@ -400,19 +397,21 @@ const MapComponent = (   {setFieldValue} ) => {
       console.error('Error fetching address:', error);
       setAddress('Error fetching address');
     }
+    
+    setIsLoading(true)  
   };
   
 
  
  
-   
+  if(isLoading===false) return(DotLoader())
   return (
     <div>
       
       <MapContainer
         center={position}
         zoom={13}
-        style={{ height: '400px', width: '100%', marginTop: '20px' }}
+        style={{ height: '700px', width: '100%', marginTop: '20px' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
