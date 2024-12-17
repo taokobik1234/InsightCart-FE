@@ -1,9 +1,10 @@
 import { MdAdminPanelSettings } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { BsClipboardCheck } from "react-icons/bs";
-
+import { MdCategory } from "react-icons/md";
 const sideBarItems = [
     {name: "Shop Verify", icon: BsClipboardCheck, to: "/admin/shop-verify"},
+    {name: "Category", icon: MdCategory, to: "/admin/category"},
 ]
 export default function Sidebar() {
   return (

@@ -22,6 +22,7 @@ import AdminScreen from "./pages/admin";
 import AdminLayout from "./components/admin/AdminLayout";
 import ShopVerify from "./pages/admin/shop-verify";
 import Contact from "./pages/contact";
+import Category from "./pages/admin/category";
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />} >
               <Route index element={<AdminScreen />} />
               <Route path="shop-verify" element={<ShopVerify />} />
+              <Route path="category" element={<Category />} />
             </Route>
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
