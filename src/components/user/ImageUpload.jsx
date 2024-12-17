@@ -2,19 +2,45 @@ import React, { useState } from 'react';
 import { Button, Box, Avatar, Typography } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { styled } from '@mui/material/styles';
+import { setUserMedia } from '../../store/userslice';
+import { useDispatch } from 'react-redux';
 
 const Input = styled('input')({
     display: 'none',
 });
 
-function ImageUpload({ avatar }) {
+function ImageUpload({ avatar, user }) {
     const [image, setImage] = useState(avatar.url || "");
-
-    const handleImageChange = (event) => {
+    const dispatch = useDispatch();
+    const handleImageChange = async (event) => {
         const file = event.target.files[0];
         if (file) {
             const imageUrl = URL.createObjectURL(file);
             setImage(imageUrl);
+        }
+        const formData = new FormData();
+        formData.append("files", file);
+
+        try {
+            const response = await fetch("http://tancatest.me/api/v1/media", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${user.token.AccessToken}`,
+                    "x-client-id": user.id,
+                    "session-id": user.session_id,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to upload image. Please try again.");
+            }
+
+            const result = await response.json();
+            console.log("Upload result:", result);
+            dispatch(setUserMedia(result.data));
+        } catch (error) {
+            console.error("Upload error:", error);
         }
     };
     return (

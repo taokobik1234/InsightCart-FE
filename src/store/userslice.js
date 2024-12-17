@@ -20,6 +20,7 @@ export const checkAuth = createAsyncThunk('auth/getUser', async ({ userId, sessi
 })
 const initialState = {
     user: null,
+    user_media: null
 };
 const authSlice = createSlice({
     name: 'user',
@@ -27,6 +28,9 @@ const authSlice = createSlice({
     reducers: {
         setUser: (state, action) => {
             state.user = action.payload;
+        },
+        setUserMedia: (state, action) => {
+            state.user_media = action.payload;
         },
         logOut: (state) => {
             state.user = null;
@@ -42,6 +46,6 @@ const authSlice = createSlice({
     }
 });
 
-export const { setUser, logOut } = authSlice.actions;
+export const { setUser, logOut, setUserMedia } = authSlice.actions;
 
 export default authSlice.reducer;
