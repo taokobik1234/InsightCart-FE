@@ -22,18 +22,24 @@ export default function ShopVerify() {
         return formattedDate;
     }
     const handleAccept = async (id) => {
-        await fetch('http://tancatest.me/api/v1/admin/verify-shop', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'session-id': user.session_id,
-                'Authorization': `Bearer ${user.token.AccessToken}`,
-                'x-client-id': user.id
-            },
-            body: JSON.stringify({
-                ids: [id]
+        try {
+            await fetch('http://tancatest.me/api/v1/admin/verify-shop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'session-id': user.session_id,
+                    'Authorization': `Bearer ${user.token.AccessToken}`,
+                    'x-client-id': user.id
+                },
+                body: JSON.stringify({
+                    ids: [id]
+                })
             })
-        })
+            setShopRequests(shopRequests.filter(request => request.id !== id))
+        } catch (error) {
+            console.log(error);
+        }
+        
     }
     const handleReject = async (id) => {
         console.log(id);
