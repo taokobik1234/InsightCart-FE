@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux"
 import { Navigate, useLocation } from "react-router-dom"
 export default function CheckAuth({children}) {
-  const admin = ["phamgianguyen.qn@gmail.com", "ducduy19012310@gmail.com"]
+  const admin = ["phamgianguyen.qn@gmail.com", "ducduy19012310@gmail.com", ]
   const {isAuthenticated, user} = useSelector(state => state.auth)
   const location = useLocation()
   if(isAuthenticated && location.pathname.includes("/auth")) {

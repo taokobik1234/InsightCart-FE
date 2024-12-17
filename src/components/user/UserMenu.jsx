@@ -3,13 +3,15 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Fade from '@mui/material/Fade';
-import { useState } from 'react';
+import { useSelector } from "react-redux"; 
+import  { useState, useEffect } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
 import { logout } from '../../store/authslice';
-import { setUser } from '../../store/userslice';
+import { setUser, setUserMedia } from '../../store/userslice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 export default function UserMenu() {
+  const { shop } = useSelector(state => state.shop); 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,9 +26,10 @@ export default function UserMenu() {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(setUser(null));
+    dispatch(setUserMedia(null));
     navigate('/');
   };
-
+ 
   return (
     <div className='bg-white'>
       <Button
@@ -58,11 +61,11 @@ export default function UserMenu() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            navigate('/user/create-shop')
+            shop ? navigate('/user/view-shop'):navigate('/user/create-shop');
             handleClose()
           }}
         >
-          Create your shop
+          {shop ? "View shop" :"Create shop"}
         </MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
