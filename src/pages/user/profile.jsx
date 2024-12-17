@@ -10,23 +10,25 @@ export default function Profile() {
   const userAuth = useSelector(state => state.auth.user)
   const user = useSelector(state => state.user.user)
   const user_media = useSelector(state => state.user.user_media)
-  console.log(user_media[0].id);
   const [userInput, setUserInput] = useState({ name: user.name, email: user.email })
   const [successMessage, setSuccessMessage] = useState("");
   const handleSave = async () => {
     try {
+      const requestBody = {
+        name: userInput.name,
+        email: userInput.email,
+        ...(user_media?.[0]?.id && { media_id: user_media[0].id }),
+      };
+
       const response = await fetch("http://tancatest.me/api/v1/users", {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${userAuth.token.AccessToken}`,
           "x-client-id": userAuth.id,
           "session-id": userAuth.session_id,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          "media_id": user_media[0].id,
-          "name": userInput.name,
-          "email": userInput.email
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

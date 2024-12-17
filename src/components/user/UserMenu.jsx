@@ -6,7 +6,7 @@ import Fade from '@mui/material/Fade';
 import { useState } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
 import { logout } from '../../store/authslice';
-import { setUser } from '../../store/userslice';
+import { setUser, setUserMedia } from '../../store/userslice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 export default function UserMenu() {
@@ -24,6 +24,7 @@ export default function UserMenu() {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(setUser(null));
+    dispatch(setUserMedia(null));
     navigate('/');
   };
 
