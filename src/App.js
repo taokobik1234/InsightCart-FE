@@ -15,6 +15,7 @@ import CheckAuth from "./components/auth/CheckAuth";
 import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
 import CreateShop from "./pages/user/create-shop";
+import ViewShop from "./pages/user/view-shop";
 import Notification from "./pages/user/notification";
 import Footer from "./components/Footer";
 import About from "./pages/about";
@@ -25,9 +26,9 @@ import Contact from "./pages/contact";
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector(state => state.auth)
+  const { isAuthenticated } = useSelector((state) => state.auth);
   useEffect(() => {
-    if (!persistAuth) return
+    if (!persistAuth) return;
     const auth = JSON.parse(persistAuth).auth;
     const user = JSON.parse(auth).user;
     if (!user) return;
@@ -38,18 +39,19 @@ function App() {
         <Header />
         <div className="min-h-screen">
           <Routes>
-            <Route path='/user' element={<UserLayout />} >
+            <Route path="/user" element={<UserLayout />}>
               <Route path="profile" element={<Profile />} />
               <Route path="create-shop" element={<CreateShop />} />
+              <Route path="view-shop" element={<ViewShop />} />
               <Route path="notification" element={<Notification />} />
             </Route>
-            <Route path="/auth" element={<AuthLayout />} >
+            <Route path="/auth" element={<AuthLayout />}>
               <Route path="sign-in" element={<LoginScreen />} />
               <Route path="sign-up" element={<SignUp />} />
               <Route path="verify-request/:email" element={<VerifyRequest />} />
               <Route path="forgot-password" element={<ForgotPassword />} />
             </Route>
-            <Route path="/admin" element={<AdminLayout />} >
+            <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminScreen />} />
               <Route path="shop-verify" element={<ShopVerify />} />
             </Route>

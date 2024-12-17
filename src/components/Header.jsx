@@ -1,12 +1,46 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch  } from 'react-redux';
 import { Link, useLocation, NavLink } from 'react-router-dom';
 import UserMenu from './user/UserMenu';
 import { TiShoppingCart } from "react-icons/ti";
+import { setShop } from '../store/shopSlice';
+
 export default function Header() {
-  const { isAuthenticated } = useSelector(state => state.auth);
-  const location = useLocation()
-  if (location.pathname.includes("/admin")) return null
+  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const dispatch = useDispatch();  
+   
+  const location = useLocation() 
+  useEffect(() => {
+    if(!user.id || !user.session_id || !user.token.AccessToken) return
+    const fetchShop = async () => {
+      try {
+        const shopId = await fetch(`http://tancatest.me/api/v1/shops/get-shop-id-by-user-id/${user.id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'session-id': user.session_id,
+            'Authorization': `Bearer ${user.token.AccessToken}`,
+            'x-client-id': user.id
+          },
+        }).then(response => response.json())
+        .then(response => response.data)
+        const shop = await fetch(`http://tancatest.me/api/v1/shops/${shopId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'session-id': user.session_id,
+            'Authorization': `Bearer ${user.token.AccessToken}`,
+            'x-client-id': user.id
+          },
+        }).then(response => response.json())
+        .then(response => response.data)
+        console.log(shop)
+        dispatch(setShop(shop)); 
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchShop()
+  }, []); 
+  if (location.pathname.includes("/admin")) return null 
   return (
     <nav className="bg-blue border-gray-200 dark:bg-gray-900 border-b-2 border-solid">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -73,7 +107,7 @@ export default function Header() {
               <TiShoppingCart size={25} />
             </li>
             <li>
-              {isAuthenticated ? <UserMenu /> : <Link to="/auth/sign-in" style={{ textDecoration: 'none', color: 'inherit' }}>Sign In</Link>}
+              {isAuthenticated ?  <UserMenu/> : <Link to="/auth/sign-in" style={{ textDecoration: 'none', color: 'inherit' }}>Sign In</Link>}
             </li>
           </ul>
         </div>
