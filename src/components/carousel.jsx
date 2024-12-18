@@ -3,7 +3,13 @@ import {
     BsFillArrowRightCircleFill,
     BsFillArrowLeftCircleFill,
 } from "react-icons/bs";
-export default function Carousel({ slides }) {
+import e1 from "../assets/e1.jpg"
+import e2 from "../assets/e2.jpg"
+import e3 from "../assets/e3.jpg"
+const slides = [
+    e3, e2, e1
+];
+export default function Carousel() {
     let [current, setCurrent] = useState(0);
 
     let previousSlide = () => {
@@ -24,8 +30,8 @@ export default function Carousel({ slides }) {
                     transform: `translateX(-${current * 100}%)`,
                 }}
             >
-                {slides.map((s) => {
-                    return <img src={s} />;
+                {slides.map((s, i) => {
+                    return <img src={s} key={i} alt="image1" />;
                 })}
             </div>
 
@@ -46,7 +52,7 @@ export default function Carousel({ slides }) {
                                 setCurrent(i);
                             }}
                             key={"circle" + i}
-                            className={`rounded-full w-5 h-5 cursor-pointer  ${i == current ? "bg-white" : "bg-gray-500"
+                            className={`rounded-full w-5 h-5 cursor-pointer  ${i === current ? "bg-white" : "bg-gray-500"
                                 }`}
                         ></div>
                     );

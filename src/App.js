@@ -24,6 +24,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import ShopVerify from "./pages/admin/shop-verify";
 import Contact from "./pages/contact";
 import Category from "./pages/admin/category";
+import ProductList from "./pages/productList";
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
@@ -62,6 +63,7 @@ function App() {
             <Route path="/" element={<HomeScreen />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/products/:categoryId" element={<ProductList />} />
           </Routes>
         </div>
         <Footer />
