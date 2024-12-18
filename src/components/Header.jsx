@@ -11,6 +11,7 @@ export default function Header() {
    
   const location = useLocation() 
   useEffect(() => {
+    if(!user) return
     if(!user.id || !user.session_id || !user.token.AccessToken) return
     const fetchShop = async () => {
       try {
