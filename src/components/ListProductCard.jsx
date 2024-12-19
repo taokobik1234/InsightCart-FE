@@ -1,19 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css"; // Default styles for react-multi-carousel
-
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { useNavigate, useLocation } from 'react-router-dom';
 const responsive = {
-    desktop: { breakpoint: { max: 3000, min: 1024 }, items: 5, slidesToSlide: 1 },
+    desktop: { breakpoint: { max: 3000, min: 1024 }, items: 6, slidesToSlide: 6 },
     tablet: { breakpoint: { max: 1024, min: 768 }, items: 3, slidesToSlide: 1 },
     mobile: { breakpoint: { max: 767, min: 464 }, items: 2, slidesToSlide: 1 },
 };
 
-export default function ListProductCardEnhanced({ products }) {
+export default function ListProductCard({ products }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location]);
     return (
         <div className="max-w-screen-xl mx-auto my-6 px-4">
             <Carousel
                 responsive={responsive}
-                autoPlay={true}
+                // autoPlay={true}
                 swipeable={true}
                 draggable={true}
                 infinite={true}
@@ -21,12 +27,25 @@ export default function ListProductCardEnhanced({ products }) {
                 keyBoardControl={true}
                 partialVisible={false}
                 dotListClass="custom-dot-list-style"
+                customLeftArrow={<button
+                    onClick={() => { }}
+                    className="absolute left-0   bg-white rounded-full hover:bg-gray-800 "
+                >
+                    <IoIosArrowBack size={40} color="black" />
+                </button>}
+                customRightArrow={<button
+                    onClick={() => { }}
+                    className="absolute right-0   bg-white rounded-full hover:bg-gray-800 "
+                >
+                    <IoIosArrowForward size={40} color="black" />
+                </button>}
                 containerClass="carousel-container"
             >
                 {products.map((product) => (
                     <div
+                        onClick={() => { navigate(`/products/details/${product.id}`) }}
                         key={product.id}
-                        className="border rounded-lg overflow-hidden shadow hover:shadow-xl transition bg-white relative mx-2"
+                        className="border rounded-lg overflow-hidden shadow hover:shadow-xl transition bg-white relative mx-2 cursor-pointer"
                     >
                         {/* Badge (Top or Sale) */}
                         {product.badge && (

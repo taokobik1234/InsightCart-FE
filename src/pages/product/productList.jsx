@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import DotLoader from "../components/ui/DotLoader";
-import Carousel from "../components/carousel";
+import DotLoader from "../../components/ui/DotLoader";
+import Carousel from "../../components/carousel";
 
 export default function ProductList() {
     const { categoryId } = useParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1); // Current page
-    const [limit] = useState(10); // Products per page
-    const [totalPages, setTotalPages] = useState(5); // Total pages
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [totalPages, setTotalPages] = useState(5);
 
     // Fetch products
     useEffect(() => {
@@ -29,7 +29,7 @@ export default function ProductList() {
                 const data = await response.json();
 
                 setProducts(data.data.items || []);
-                setTotalPages(Math.ceil(data.data.meta.total / limit)); // Calculate total pages
+                setTotalPages(Math.ceil(data.data.meta.total / limit));
             } catch (error) {
                 console.error("Error fetching products:", error);
             } finally {

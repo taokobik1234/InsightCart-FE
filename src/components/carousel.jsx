@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     BsFillArrowRightCircleFill,
     BsFillArrowLeftCircleFill,
@@ -11,7 +11,6 @@ const slides = [
 ];
 export default function Carousel() {
     let [current, setCurrent] = useState(0);
-
     let previousSlide = () => {
         if (current === 0) setCurrent(slides.length - 1);
         else setCurrent(current - 1);
@@ -21,6 +20,14 @@ export default function Carousel() {
         if (current === slides.length - 1) setCurrent(0);
         else setCurrent(current + 1);
     };
+    useEffect(() => {
+        const autoSlide = setInterval(() => {
+            nextSlide();
+        }, 4000);
+
+        return () => clearInterval(autoSlide);
+    }, [current]);
+
 
     return (
         <div className="overflow-hidden relative">
@@ -37,10 +44,10 @@ export default function Carousel() {
 
             <div className="absolute top-0 h-full w-full justify-between items-center flex text-white px-10 text-3xl">
                 <button onClick={previousSlide}>
-                    <BsFillArrowLeftCircleFill />
+                    <BsFillArrowLeftCircleFill size={20} />
                 </button>
                 <button onClick={nextSlide}>
-                    <BsFillArrowRightCircleFill />
+                    <BsFillArrowRightCircleFill size={20} />
                 </button>
             </div>
 
@@ -52,7 +59,7 @@ export default function Carousel() {
                                 setCurrent(i);
                             }}
                             key={"circle" + i}
-                            className={`rounded-full w-5 h-5 cursor-pointer  ${i === current ? "bg-white" : "bg-gray-500"
+                            className={`rounded-full w-2 h-2 cursor-pointer  ${i === current ? "bg-white" : "bg-gray-500"
                                 }`}
                         ></div>
                     );

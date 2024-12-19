@@ -12,9 +12,9 @@ import pogba from '../assets/pogba.jpg'
 import ServiceCard from '../components/ServiceCard';
 export default function About() {
     return (
-        <div className="flex flex-col w-full mt-10 mb-20">
+        <div className="flex flex-col w-full pt-10 pb-10 bg-gray-100">
             <div className="flex flex-row w-full">
-                <div className="flex flex-col justify-center bg-white text-left p-12 w-1/2">
+                <div className="flex flex-col justify-center bg-gray-100 text-left p-12 w-1/2">
                     <h1 className="text-3xl font-bold mb-4">Our Story</h1>
                     <p>Launched in 2015, Exclusive is South Asia’s premier online shopping marketplace with an active presence in Bangladesh. Supported by a wide range of tailored marketing, data and service solutions, Exclusive has 10,500 sellers and 300 brands and serves 3 million customers across the region.</p>
                     <p className="mt-2">Exclusive has more than 1 Million products to offer, growing at a very fast pace. Exclusive offers a diverse assortment in categories ranging from consumer.</p>
@@ -27,7 +27,7 @@ export default function About() {
             </div>
 
 
-            <div className="flex justify-center items-center space-x-8 p-4 bg-white mt-40">
+            <div className="flex justify-center items-center space-x-8 p-4 bg-gray-100 mt-40">
 
                 <div className="bg-white p-4 shadow-md flex flex-col items-center justify-center w-1/5">
                     <div className="bg-gray-300 p-2 rounded-full mb-2">
@@ -72,7 +72,7 @@ export default function About() {
                 </div>
             </div>
 
-            <div className="flex flex-wrap-reverse justify-center gap-8 bg-gray-50 p-8 mt-20">
+            <div className="flex flex-wrap-reverse justify-center gap-8 bg-gray-100 p-8 mt-20">
 
                 <div className="max-w-xs text-center bg-white shadow-lg p-6 rounded-lg">
                     <img src={ronaldo} alt="Tom Cruise" className="mx-auto rounded-lg mb-4 w-60 h-60 object-contain transform transition duration-300 hover:scale-110" />

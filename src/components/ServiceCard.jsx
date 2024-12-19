@@ -5,7 +5,7 @@ import GppGoodIcon from '@mui/icons-material/GppGood';
 
 export default function ServiceCard() {
     return (
-        <div className="flex flex-wrap justify-center items-center gap-8 p-4 bg-white mt-40">
+        <div className="flex flex-wrap justify-center items-center gap-8 p-4 bg-gray-100 mt-35">
             {/* Card 1 */}
             <div className="flex flex-col items-center justify-center w-full sm:w-1/2 md:w-1/4">
                 <div className="bg-gray-300 p-2 rounded-full mb-2">

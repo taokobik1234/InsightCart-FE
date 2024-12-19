@@ -24,7 +24,8 @@ import AdminLayout from "./components/admin/AdminLayout";
 import ShopVerify from "./pages/admin/shop-verify";
 import Contact from "./pages/contact";
 import Category from "./pages/admin/category";
-import ProductList from "./pages/productList";
+import ProductList from "./pages/product/productList";
+import ProductDetailPage from "./pages/product/productDetail";
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ function App() {
     <div>
       <CheckAuth>
         <Header />
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gray-100">
           <Routes>
             <Route path="/user" element={<UserLayout />}>
               <Route path="profile" element={<Profile />} />
@@ -64,6 +65,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/products/:categoryId" element={<ProductList />} />
+            <Route path="/products/details/:productId" element={<ProductDetailPage />} />
           </Routes>
         </div>
         <Footer />
