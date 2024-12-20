@@ -32,8 +32,7 @@ export default function Header() {
             'x-client-id': user.id
           },
         }).then(response => response.json())
-        .then(response => response.data)
-        console.log(shop)
+        .then(response => response.data) 
         dispatch(setShop(shop)); 
       } catch (error) {
         console.log(error);
