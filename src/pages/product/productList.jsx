@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import DotLoader from "../../components/ui/DotLoader";
-import Carousel from "../../components/carousel";
 
 export default function ProductList() {
     const { categoryId } = useParams();
+    const [searchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -20,6 +20,11 @@ export default function ProductList() {
                 if (categoryId !== 'all') {
                     url += `&category_ids=${categoryId}`;
                 }
+                const searchQuery = searchParams.get("search");
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
+                }
+                console.log(url);
                 const response = await fetch(
                     url,
                     {
@@ -38,7 +43,7 @@ export default function ProductList() {
         };
 
         fetchProducts();
-    }, [categoryId, page, limit]);
+    }, [categoryId, page, limit, searchParams]);
 
     // Handle page change
     const handlePageChange = (newPage) => {
@@ -49,9 +54,6 @@ export default function ProductList() {
 
     return (
         <div className="max-w-screen-xl mx-auto p-4">
-            <div className="w-4/5 bg-white mx-auto">
-                <Carousel />
-            </div>
             <h1 className="text-3xl font-bold mb-6">Products</h1>
             {loading ? (
                 <DotLoader />

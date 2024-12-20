@@ -3,7 +3,11 @@ import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { useParams, NavLink } from "react-router-dom";
 import ListProductCard from "../../components/ListProductCard";
 import ServiceCard from "../../components/ServiceCard";
+import { Alert, Box } from "@mui/material";
+import { useSelector } from "react-redux";
+
 export default function ProductDetailPage() {
+    const { isAuthenticated, user } = useSelector((state) => state.auth);
     const { productId } = useParams();
     const [images, setImages] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -11,6 +15,7 @@ export default function ProductDetailPage() {
     const [productDetail, setProductDetail] = useState({});
     const [activeTab, setActiveTab] = useState("description");
     const [relatedProducts, setRelatedProducts] = useState([]);
+    const [message, setMessage] = useState({ type: "", message: "" });
     useEffect(() => {
         const fetchProductDetail = async () => {
             try {
@@ -29,7 +34,6 @@ export default function ProductDetailPage() {
                         ? productImages[0].url
                         : "https://via.placeholder.com/300"
                 );
-                console.log("productDetail", data.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
             }
@@ -54,7 +58,6 @@ export default function ProductDetailPage() {
                     }
                 );
                 const data = await response.json();
-                console.log("relatedProducts", data.data);
                 setRelatedProducts(data.data.items || []);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -68,8 +71,56 @@ export default function ProductDetailPage() {
         if (type === "decrement" && quantity > 1) setQuantity(quantity - 1);
     };
 
+    const handleAddtoCart = async () => {
+        if (!isAuthenticated) {
+            setMessage({ type: "warning", message: "You need to sign in to add to cart" });
+            setTimeout(() => setMessage(""), 3000);
+            return;
+        }
+        try {
+            const response = await fetch(
+                `http://tancatest.me/api/v1/carts/add`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "session-id": user.session_id,
+                        "Authorization": `Bearer ${user.token.AccessToken}`,
+                        "x-client-id": user.id
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: quantity }),
+                }
+            );
+            const data = await response.json();
+            if (data.message !== "Success") {
+                setMessage({ type: "warning", message: data.message });
+                setTimeout(() => setMessage(""), 3000);
+            } else {
+                setMessage({ type: "success", message: "Added to cart" });
+                setTimeout(() => setMessage(""), 3000);
+            }
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+        }
+    }
     return (
         <div className="bg-gray-100 min-h-screen py-10">
+            {/* details */}
+            {message.message && (
+                <Box
+                    sx={{
+                        position: "fixed",
+                        top: "100px",
+                        right: "20px",
+                        zIndex: 1000, // Ensures it is above other components
+                        minWidth: "250px",
+                    }}
+                >
+                    <Alert severity={message.type} variant="filled">
+                        {message.message}
+                    </Alert>
+                </Box>
+            )}
             <div className="max-w-7xl mx-auto p-6 flex space-x-8 bg-white">
                 {/* Left Side - Images */}
                 <div className="flex space-x-4">
@@ -149,7 +200,11 @@ export default function ProductDetailPage() {
                                 <AiOutlinePlus />
                             </button>
                         </div>
-                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-red-600">
+                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-red-600" onClick={handleAddtoCart}>
+                            Add to Cart
+                        </button>
+
+                        <button className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition duration-300 font-bold">
                             Buy Now
                         </button>
                     </div>

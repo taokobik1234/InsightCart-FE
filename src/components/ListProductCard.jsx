@@ -3,6 +3,7 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css"; // Default styles for react-multi-carousel
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate, useLocation } from 'react-router-dom';
+
 const responsive = {
     desktop: { breakpoint: { max: 3000, min: 1024 }, items: 6, slidesToSlide: 6 },
     tablet: { breakpoint: { max: 1024, min: 768 }, items: 3, slidesToSlide: 1 },
@@ -12,14 +13,33 @@ const responsive = {
 export default function ListProductCard({ products }) {
     const navigate = useNavigate();
     const location = useLocation();
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [location]);
+
+    const ArrowFixLeft = ({ onClick }) => (
+        <button
+            onClick={onClick}
+            className="absolute left-0 bg-white rounded-full hover:bg-gray-800"
+        >
+            <IoIosArrowBack size={40} color="black" />
+        </button>
+    );
+
+    const ArrowFixRight = ({ onClick }) => (
+        <button
+            onClick={onClick}
+            className="absolute right-0 bg-white rounded-full hover:bg-gray-800"
+        >
+            <IoIosArrowForward size={40} color="black" />
+        </button>
+    );
+
     return (
         <div className="max-w-screen-xl mx-auto my-6 px-4">
             <Carousel
                 responsive={responsive}
-                // autoPlay={true}
                 swipeable={true}
                 draggable={true}
                 infinite={true}
@@ -27,23 +47,13 @@ export default function ListProductCard({ products }) {
                 keyBoardControl={true}
                 partialVisible={false}
                 dotListClass="custom-dot-list-style"
-                customLeftArrow={<button
-                    onClick={() => { }}
-                    className="absolute left-0   bg-white rounded-full hover:bg-gray-800 "
-                >
-                    <IoIosArrowBack size={40} color="black" />
-                </button>}
-                customRightArrow={<button
-                    onClick={() => { }}
-                    className="absolute right-0   bg-white rounded-full hover:bg-gray-800 "
-                >
-                    <IoIosArrowForward size={40} color="black" />
-                </button>}
                 containerClass="carousel-container"
+                customLeftArrow={<ArrowFixLeft />}
+                customRightArrow={<ArrowFixRight />}
             >
                 {products.map((product) => (
                     <div
-                        onClick={() => { navigate(`/products/details/${product.id}`) }}
+                        onClick={() => navigate(`/products/details/${product.id}`)}
                         key={product.id}
                         className="border rounded-lg overflow-hidden shadow hover:shadow-xl transition bg-white relative mx-2 cursor-pointer"
                     >
@@ -69,7 +79,7 @@ export default function ListProductCard({ products }) {
                         {/* Product Info */}
                         <div className="text-center p-3">
                             <p className="text-red-500 font-bold text-lg mb-1">
-                                $ 10
+                                $ {product.price || "N/A"}
                             </p>
                             <p className="text-gray-800 text-sm font-medium mb-2 truncate">
                                 {product.name}

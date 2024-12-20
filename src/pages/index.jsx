@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Carousel from "../components/carousel";
+import CarouselComponent from "../components/carousel";
 import { NavLink, useLocation } from "react-router-dom";
 import ListProductCard from "../components/ListProductCard";
 import ps5 from "../assets/ps5.png"
@@ -87,7 +87,7 @@ function HomeScreen() {
 
                 {/* Carousel */}
                 <div className="w-3/5 bg-white mx-auto">
-                    <Carousel />
+                    <CarouselComponent />
                 </div>
             </div>
             {/* List Product */}

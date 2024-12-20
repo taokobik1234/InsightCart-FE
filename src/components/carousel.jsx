@@ -9,7 +9,7 @@ import e3 from "../assets/e3.jpg"
 const slides = [
     e3, e2, e1
 ];
-export default function Carousel() {
+export default function CarouselComponent() {
     let [current, setCurrent] = useState(0);
     let previousSlide = () => {
         if (current === 0) setCurrent(slides.length - 1);
@@ -26,7 +26,7 @@ export default function Carousel() {
         }, 4000);
 
         return () => clearInterval(autoSlide);
-    }, [current]);
+    }, []);
 
 
     return (

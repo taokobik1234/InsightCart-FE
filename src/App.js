@@ -26,6 +26,7 @@ import Contact from "./pages/contact";
 import Category from "./pages/admin/category";
 import ProductList from "./pages/product/productList";
 import ProductDetailPage from "./pages/product/productDetail";
+import CartScreen from "./pages/product/cart";
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
   const dispatch = useDispatch();
@@ -40,7 +41,7 @@ function App() {
     <div>
       <CheckAuth>
         <Header />
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen">
           <Routes>
             <Route path="/user" element={<UserLayout />}>
               <Route path="profile" element={<Profile />} />
@@ -64,6 +65,7 @@ function App() {
             <Route path="/" element={<HomeScreen />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/cart" element={<CartScreen />} />
             <Route path="/products/:categoryId" element={<ProductList />} />
             <Route path="/products/details/:productId" element={<ProductDetailPage />} />
           </Routes>
