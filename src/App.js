@@ -15,7 +15,8 @@ import CheckAuth from "./components/auth/CheckAuth";
 import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
 import CreateShop from "./pages/user/create-shop";
-import ViewShop from "./pages/user/view-shop";
+import ViewYourShop from "./pages/user/view-shop";
+import ViewShop from "./pages/shop/view-shop";
 import Notification from "./pages/user/notification";
 import Footer from "./components/Footer";
 import About from "./pages/about";
@@ -46,7 +47,7 @@ function App() {
             <Route path="/user" element={<UserLayout />}>
               <Route path="profile" element={<Profile />} />
               <Route path="create-shop" element={<CreateShop />} />
-              <Route path="view-shop" element={<ViewShop />} />
+              <Route path="view-shop" element={<ViewYourShop />} />
               <Route path="notification" element={<Notification />} />
             </Route>
             <Route path="/auth" element={<AuthLayout />}>
@@ -67,7 +68,11 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/cart" element={<CartScreen />} />
             <Route path="/products/:categoryId" element={<ProductList />} />
-            <Route path="/products/details/:productId" element={<ProductDetailPage />} />
+            <Route
+              path="/products/details/:productId"
+              element={<ProductDetailPage />}
+            />
+            <Route path="/shop/:shopId" element={<ViewShop />} />
           </Routes>
         </div>
         <Footer />

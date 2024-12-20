@@ -154,6 +154,10 @@ export default function ProductDetailPage() {
                         <span>(150 Reviews)</span>
                         <span className="text-green-500 font-semibold">In Stock</span>
                     </div>
+                    <div className="flex items-center space-x-2 text-sm mb-4">
+                        <span className="text-black-500">Seller: {productDetail.shop_name}</span>
+                      
+                    </div>        
                     <h2 className="text-3xl font-bold mb-2">${productDetail.price}</h2>
                     <p className="text-gray-600 mb-4">
                         PlayStation 5 Controller Skin High quality vinyl with air channel
@@ -229,6 +233,63 @@ export default function ProductDetailPage() {
                                 </p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>                    
+           {/* Shop Information */}
+            <div className="max-w-7xl mx-auto p-6 bg-white mt-10">
+                <div className="flex items-start space-x-4 border-b pb-6 mb-6">
+                    {/* Shop Logo */}
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
+                        <img
+                            src={productDetail.shop_logo || "https://via.placeholder.com/64"}
+                            alt="Shop Logo"
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+
+                    {/* Shop Details   */}
+                    <div className="flex-[0.25] flex space-x-4">
+                        {/* Shop Details */}
+                        <div className="mb-4">
+                            <h2 className="text-lg font-bold">{productDetail.shop_name || "Shop Name"}</h2>
+                            <p className="text-gray-500">Online {productDetail.last_active || "N/A"} ago</p>
+                        </div>
+
+                         
+                    </div>
+                    <div className="flex-1 flex justify-between items-center " >
+                        {/* Shop Statistics */}
+                        <div className="grid grid-cols-2 gap-6 text-sm">
+                            <div>
+                                <span className="text-gray-500">Rating </span>
+                                <p className="font-bold">{productDetail.shop_reviews || "N/A"}</p>
+                            </div>
+                            <div>
+                                <span className="text-gray-500">Products Count</span>
+                                <p className="font-bold">{productDetail.shop_products || "N/A"}</p>
+                            </div>
+                            
+                            <div>
+                                <span className="text-gray-500">Join date </span>
+                                <p className="font-bold">{productDetail.joined_date || "N/A"}</p>
+                            </div>
+                            <div>
+                                <span className="text-gray-500">Followers</span>
+                                <p className="font-bold">{productDetail.followers || "N/A"}</p>
+                            </div>
+                        </div> 
+                    </div>            
+                    {/* Actions */}
+                    <div className="flex space-x-4">
+                        <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            Chat Now
+                        </button>
+                        <NavLink to={`/shop/${productDetail.shop_id}`}> 
+                        <button className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-100">
+                            View Shop
+                        </button>
+                        </NavLink> 
                     </div>
                 </div>
             </div>

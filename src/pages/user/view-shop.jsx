@@ -783,7 +783,7 @@ const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
     </Box>
   </Box>
 );
-export default function ViewShop() {
+export default function ViewYourShop() {
   const { user } = useSelector((state) => state.auth);
   const { shop } = useSelector((state) => state.shop);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
