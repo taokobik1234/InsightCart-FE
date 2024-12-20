@@ -22,10 +22,19 @@ import {
   Grid,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setShop } from '../../store/shopSlice';
-
+import { setShop } from "../../store/shopSlice";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import DotLoader from "../../components/ui/DotLoader";
 const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   <Box
     display="flex"
@@ -53,8 +62,32 @@ const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   </Box>
 );
 
-const ProductsTable = ({ products }) => (
-  <TableContainer component={Card}>
+const ProductsTable = ({ products ,setProducts, user}) => { 
+  const[openDelete,setopenDelete] = useState(false) 
+  const[id,setId] = useState(null) 
+  const DeleteProducts = async () => {
+    try {
+      const res = await fetch("http://tancatest.me/api/v1/shops/products/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "session-id": user.session_id,
+          Authorization: `Bearer ${user.token.AccessToken}`,
+          "x-client-id": user.id,
+        },
+        body: JSON.stringify({ "ids": [id] }),  
+      }) 
+        .then((res) => res.json())
+        .then((res) => res.data); 
+      setProducts((prevProducts) => prevProducts.filter(product => product.id !== id));
+      setopenDelete(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };  
+   return(
+    <Box> 
+   <TableContainer component={Card}>
     <Table>
       <TableHead>
         <TableRow sx={{ backgroundColor: "#1976d2" }}>
@@ -80,20 +113,23 @@ const ProductsTable = ({ products }) => (
       </TableHead>
       <TableBody>
         {products.map((product) => (
-          <TableRow key={product.id}>
+          <TableRow key={product.id}  >
             <TableCell align="center">{product.id}</TableCell>
             <TableCell align="center">{product.name}</TableCell>
-            <TableCell align="center">{product.type}</TableCell>
+            <TableCell align="center">{product.category_objects[0].name}</TableCell>
             <TableCell align="center">{product.price}</TableCell>
-            <TableCell align="center">{product.quantity}</TableCell>
-            <TableCell align="center">{product.quantity}</TableCell>
-            <TableCell align="center">{product.quantity}</TableCell>
+            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
+            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
+            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
             <TableCell align="center">
               <Box display="flex" flexDirection="column" alignItems="center">
                 <Button variant="text" color="primary" size="small">
                   Edit
                 </Button>
-                <Button variant="text" color="secondary" size="small">
+                <Button variant="text" color="error" size="small" onClick={() => {
+            setopenDelete(true);
+            setId(product.id);
+          }}>
                   Delete
                 </Button>
               </Box>
@@ -101,18 +137,41 @@ const ProductsTable = ({ products }) => (
           </TableRow>
         ))}
       </TableBody>
-    </Table>
-  </TableContainer>
+    </Table> 
+   </TableContainer>
+   <Dialog open={openDelete} onClose={() => setopenDelete(false)}
+ fullWidth maxWidth="md">
+    <DialogTitle>Product Delete</DialogTitle>
+    <DialogContent></DialogContent>
+    <DialogActions>
+      <Button
+        onClick={() => {
+          setopenDelete(false); 
+        }}
+        color="secondary"
+      >
+        Cancel
+      </Button>
+      <Button 
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          DeleteProducts(); 
+        }} 
+      >
+        Confirm
+      </Button>
+    </DialogActions>
+  </Dialog>   
+  </Box>  
 );
-
-const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
+} 
+const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => { 
   const [previewUrl, setPreviewUrl] = useState(url);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
+    if (file) { 
       setPreviewUrl(URL.createObjectURL(file));
       const formData = new FormData();
       formData.append("files", file);
@@ -170,12 +229,7 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
     </Box>
   );
 };
-const AddProductDialog = ({
-  open,
-  handleClose, 
-  categories,
-  user,
-}) => {
+const AddProductDialog = ({ open, handleClose, categories, user }) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
     category_ids: "",
@@ -186,7 +240,7 @@ const AddProductDialog = ({
     reorder_quantity: 0,
     stock_level: 0,
   });
-    
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -231,7 +285,7 @@ const AddProductDialog = ({
         .then((response) => response.json())
         .then((response) => response.data);
 
-      handleClose()
+      handleClose();
     } catch (error) {
       console.log(error);
     }
@@ -336,7 +390,6 @@ const AddProductDialog = ({
         <Button onClick={handleSubmit} variant="contained" color="primary">
           Submit
         </Button>
-         
       </DialogActions>
     </Dialog>
   );
@@ -344,11 +397,11 @@ const AddProductDialog = ({
 
 const ViewShopDialog = ({
   open,
-  handleClose,  
+  handleClose,
   handleSubmit,
   user,
   shop,
-  handleOpen, 
+  handleOpen,
 }) => {
   const [userInput, setUserInput] = useState({
     name: shop.name,
@@ -356,145 +409,335 @@ const ViewShopDialog = ({
     city: shop.address.city,
     street: shop.address.street,
     district: shop.address.district,
-    media_ids:  shop.avatar_obj.url
+    media_ids: shop.avatar_obj.url,
   });
+  useEffect(() => {
+    if (!open) {
+      setUserInput({
+        name: shop.name,
+        phone: shop.phone,
+        city: shop.address.city,
+        street: shop.address.street,
+        district: shop.address.district,
+        media_ids: shop.avatar_obj.url,
+      });
+    }
+  }, [open, shop]);
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
-  const [openDelete, setOpenDelete] = useState(false); 
+  const [openDelete, setOpenDelete] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const dispatch = useDispatch();
- 
+
   const DeleteShop = async () => {
     try {
-      const cates = await fetch("http://tancatest.me/api/v1/shops", {
-        method: "DELETE", 
+      const res = await fetch("http://tancatest.me/api/v1/shops", {
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
-            'session-id': user.session_id,
-            'Authorization': `Bearer ${user.token.AccessToken}`,
-            'x-client-id': user.id
+          "Content-Type": "application/json",
+          "session-id": user.session_id,
+          Authorization: `Bearer ${user.token.AccessToken}`,
+          "x-client-id": user.id,
         },
       })
         .then((res) => res.json())
-        .then((res) => res.data); 
-        dispatch(setShop(null)); 
-        setOpenDelete(false) 
+        .then((res) => res.data);
+      dispatch(setShop(null));
+      setOpenDelete(false);
     } catch (error) {
       console.error(error);
     }
   };
   return (
-     <Box> 
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Shop Detail</DialogTitle>
-      <DialogContent>
-        <Grid container spacing={3}>
-          <Grid item xs={8}>
-            <Box
-              component="form"
-              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+    <Box>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>Shop Detail</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3}>
+            <Grid item xs={8}>
+              <Box
+                component="form"
+                sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+              >
+                <TextField
+                  label="Name"
+                  name="name"
+                  value={userInput.name}
+                  onChange={(e) =>
+                    setUserInput({ ...userInput, name: e.target.value })
+                  }
+                  fullWidth
+                  sx={{ mt: 2 }}
+                />
+
+                <TextField
+                  label="Phone"
+                  name="phone"
+                  value={userInput.phone}
+                  onChange={(e) =>
+                    setUserInput({ ...userInput, phone: e.target.value })
+                  }
+                  fullWidth
+                />
+
+                <TextField
+                  label="City"
+                  name="city"
+                  value={userInput.city}
+                  onChange={(e) =>
+                    setUserInput({ ...userInput, city: e.target.value })
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label="District"
+                  name="district"
+                  value={userInput.district}
+                  onChange={(e) =>
+                    setUserInput({ ...userInput, district: e.target.value })
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label="Street"
+                  name="street"
+                  value={userInput.street}
+                  onChange={(e) =>
+                    setUserInput({ ...userInput, street: e.target.value })
+                  }
+                  fullWidth
+                />
+                <Typography
+                  onClick={() => {
+                    setMapOpen(true);
+                  }}
+                  sx={{
+                    textDecoration: "underline",
+                    color: "#00D5FA",
+                    "&:hover": {
+                      cursor: "pointer",
+                      color: "#E6FBFF",
+                    },
+                  }}
+                >
+                  "Choose address from the maps"
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid
+              item
+              xs={4}
+              sx={{ display: "flex", justifyContent: "center" }}
             >
-              <TextField
-                label="Name"
-                name="name"
-                value={userInput.name}
-                onChange={(e) =>
-                  setUserInput({ ...userInput, name: e.target.value })
+              <ImageUpload
+                onUpload={(mediaId) =>
+                  setUserInput({
+                    target: { name: "media_ids", value: mediaId },
+                  })
                 }
-                fullWidth
-                sx={{ mt: 2 }}
+                onFileNameChange={(fileName) => setSelectedFileName(fileName)}
+                user={user}
+                url={shop.avatar_obj.url}
               />
-
-              <TextField
-                label="Phone"
-                name="phone"
-                value={userInput.phone}
-                onChange={(e) =>
-                  setUserInput({ ...userInput, phone: e.target.value })
-                }
-                fullWidth
-              />
-
-              <TextField
-                label="City"
-                name="city"
-                value={userInput.city}
-                onChange={(e) =>
-                  setUserInput({ ...userInput, city: e.target.value })
-                }
-                fullWidth
-              />
-              <TextField
-                label="District"
-                name="district"
-                value={userInput.district}
-                onChange={(e) =>
-                  setUserInput({ ...userInput, district: e.target.value })
-                }
-                fullWidth
-              />
-              <TextField
-                label="Street"
-                name="street"
-                value={userInput.street}
-                onChange={(e) =>
-                  setUserInput({ ...userInput, street: e.target.value })
-                }
-                fullWidth
-              />
+            </Grid>
+          </Grid>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={2}
+            mb={2}
+          >
+            <Button
+              onClick={() => {
+                setOpenDelete(true);
+                handleClose();
+              }}
+              variant="contained"
+              color="error"
+            >
+              Delete Shop
+            </Button>
+            <Box>
+              <Button onClick={handleClose} color="info">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                color="primary"
+              >
+                Submit
+              </Button>
             </Box>
-          </Grid>
-          <Grid item xs={4} sx={{ display: "flex", justifyContent: "center" }}>
-            <ImageUpload
-              onUpload={(mediaId) =>
-                setUserInput({ target: { name: "media_ids", value: mediaId } })
-              }
-              onFileNameChange={(fileName) => setSelectedFileName(fileName)}
-              user={user}
-              url={shop.avatar_obj.url}
-            />
-          </Grid>
-        </Grid>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={2}
-          mb={2}
-        >
-        <Button onClick={() => { setOpenDelete(true); handleClose(); }} variant="contained" color="error">
-            Delete Shop
-          </Button> 
-          <Box>
-            <Button onClick={handleClose} color="info">
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openDelete} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>Shop Delete</DialogTitle>
+        <DialogContent></DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenDelete(false);
+              handleOpen();
+            }}
+            color="secondary"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            Submit
+          <Button
+            onClick={() => {
+              DeleteShop();
+            }}
+            variant="contained"
+            color="primary"
+          >
+            Confirm
           </Button>
-          </Box>
-        </Box> 
-      </DialogContent>  
-    </Dialog> 
-     
-    <Dialog open={openDelete} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Shop Delete</DialogTitle>
-      <DialogContent>
-          
-      </DialogContent>  
-      <DialogActions>
-        <Button onClick={() => { setOpenDelete(false); handleOpen(); }} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={() =>{DeleteShop()}} variant="contained" color="primary">
-          Confirm
-        </Button>
-         
-      </DialogActions> 
-    </Dialog>  
-     </Box> 
-     
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={mapOpen}
+        onClose={() => {
+          setMapOpen(false);
+          handleOpen();
+        }}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogTitle>Map</DialogTitle>
+        <DialogContent>
+          <MapComponent setFieldValue={setUserInput} userInput={userInput} />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setMapOpen(false);
+            }}
+            color="primary"
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+const MapComponent = ({ setFieldValue, userInput }) => {
+  const [position, setPosition] = useState();
+  const [address, setAddress] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  // Use effect to get user's current position
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setPosition([latitude, longitude]);
+          fetchAddress({ lat: latitude, lng: longitude });
+        },
+        (err) => {
+          console.error("Error fetching current location:", err);
+          // Set to a default location or show an error message
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  // Custom component to update the map's center
+  const RecenterAutomatically = ({ position }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(position, map.getZoom(), { animate: true });
+    }, [position, map]);
+    return null;
+  };
+
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        setPosition([e.latlng.lat, e.latlng.lng]);
+        fetchAddress(e.latlng);
+      },
+    });
+
+    return position === null ? null : <Marker position={position}></Marker>;
+  };
+
+  const fetchAddress = async ({ lat, lng }) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+      const data = await response.json();
+
+      // Extract specific fields from the response
+      const number = data.address.house_number || "";
+      const street = data.address.road || "";
+      const city =
+        data.address.city || data.address.town || data.address.village || "";
+      const district = data.address.suburb || data.address.neighbourhood || "";
+
+      // Combine the fields into a single string address
+      const formattedAddress = `${number} ${street}, ${district}, ${city}`;
+
+      // Set the extracted fields in the component's state
+
+      setFieldValue({
+        ...userInput,
+        street,
+        district,
+        city,
+      });
+      setAddress(formattedAddress);
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      setAddress("Error fetching address");
+    }
+
+    setIsLoading(true);
+  };
+
+  if (isLoading === false) return DotLoader();
+  return (
+    <div>
+      <MapContainer
+        center={position}
+        zoom={13}
+        style={{ height: "700px", width: "100%", marginTop: "20px" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <RecenterAutomatically position={position} />
+        <LocationMarker />
+      </MapContainer>
+      <div style={{ marginTop: "20px" }}>
+        <strong>Selected Address:</strong>
+        <p>{address}</p>
+      </div>
+    </div>
+  );
+};
+
 const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
   <Box
     display="flex"
@@ -545,9 +788,10 @@ export default function ViewShop() {
   const { shop } = useSelector((state) => state.shop);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
+  const [products, setproducts] = useState([]); 
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
-   
+
   const navigate = useNavigate();
 
   const fetchCategories = async () => {
@@ -558,101 +802,44 @@ export default function ViewShop() {
         },
       })
         .then((res) => res.json())
-        .then((res) => res.data);
-      console.log(cates.categories);
+        .then((res) => res.data); 
       setCategories(cates.categories);
     } catch (error) {
       console.error(error);
     }
   };
-
+  
   useEffect(() => {
     fetchCategories();
-  }, []);
+    fetchProduct(); 
+  }, [shop]);
 
-  const [formData, setFormData] = useState({
-    category_ids: "",
-    media_ids: "",
-    name: "",
-    price: "",
-    reorder_level: 0,
-    reorder_quantity: 0,
-    stock_level: 0,
-  });
-    
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        name === "price"
-          ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-          : value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    const numericPrice = formData.price.replace(/\./g, "");
-    const dataToSubmit = { ...formData, price: parseInt(numericPrice, 10) };
-    console.log("Submitted Data:", dataToSubmit);
-    createProduct();
-  };
-
-  const createProduct = async () => {
+ 
+  const fetchProduct = async () => {
+    if (!shop) return null; 
+    console.log (shop.id)
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/create-product `,
-        {
-          method: "POST",
+        `http://tancatest.me/api/v1/shops/products?shop_id=671cb859fb04eff50015bf06  `,
+        { 
           headers: {
             "Content-Type": "application/json",
             "session-id": user.session_id,
             Authorization: `Bearer ${user.token.AccessToken}`,
             "x-client-id": user.id,
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            price: formData.price,
-            reorder_level: formData.reorder_level,
-            reorder_quantity: formData.reorder_quantity,
-            stock_level: formData.stock_level,
-            media_ids: formData.media_ids,
-            category_ids: formData.category_ids,
-          }),
+          }, 
         }
       )
         .then((response) => response.json())
         .then((response) => response.data);
-
+      console.log("Content-Type",response.products)   
+      setproducts(response.products)  
       setOpen(false);
     } catch (error) {
       console.log(error);
     }
   };
-  const products = [
-    {
-      id: 1,
-      name: "Test1",
-      type: "Test Product",
-      price: "$34.00",
-      quantity: 100000,
-    },
-    {
-      id: 2,
-      name: "Test21",
-      type: "Test Product",
-      price: "$32.00",
-      quantity: 100000,
-    },
-    {
-      id: 3,
-      name: "Test3",
-      type: "Test Product",
-      price: "$38.00",
-      quantity: 100000,
-    },
-  ];
-  console.log(formData);
+   
   if (!shop) return null;
   if (shop.is_verified === true)
     return (
@@ -673,18 +860,18 @@ export default function ViewShop() {
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
       />
-      <ProductsTable products={products} />
+      <ProductsTable products={products} setProducts={setproducts} user={user}></ProductsTable>
       <AddProductDialog
         open={open}
-        handleClose={() => setOpen(false)} 
+        handleClose={() => setOpen(false)}
         categories={categories}
         user={user}
       />
-      <ViewShopDialog 
+      <ViewShopDialog
         shop={shop}
         open={open2}
         handleClose={() => setOpen2(false)}
-        handleOpen={() => setOpen2(true)} 
+        handleOpen={() => setOpen2(true)}
         user={user}
       />
     </Container>
