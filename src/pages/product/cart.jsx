@@ -2,11 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { ImBin } from "react-icons/im";
 import debounce from "lodash.debounce";
+import { useNavigate } from "react-router-dom";
 
 export default function CartScreen() {
     const { user } = useSelector((state) => state.auth);
     const [cartData, setCartData] = useState([]);
     const [subtotal, setSubtotal] = useState(0);
+    const [message, setMessage] = useState({ type: "", message: "" });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCartData = async () => {
@@ -98,11 +101,58 @@ export default function CartScreen() {
         debouncedUpdateCartAPI(updatedCartData);
     };
 
+    const handleCheckout = async () => {
+        try {
+            const productIds = cartData.flatMap(shop => 
+                shop.item.map(product => product.product_id)
+            );
+
+            const response = await fetch("http://tancatest.me/api/v1/checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "session-id": user.session_id,
+                    "Authorization": `Bearer ${user.token.AccessToken}`,
+                    "x-client-id": user.id,
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    product_ids: productIds
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok && data.message === "Success") {
+                // Navigate to checkout page with order data
+                navigate('/checkout', { 
+                    state: { 
+                        checkoutData: data.data,
+                        cartData: cartData
+                    } 
+                });
+            } else {
+                setMessage({ type: "error", message: data.message || "Checkout failed" });
+                setTimeout(() => setMessage({ type: "", message: "" }), 3000);
+            }
+        } catch (error) {
+            console.error("Error during checkout:", error);
+            setMessage({ type: "error", message: "An error occurred during checkout" });
+            setTimeout(() => setMessage({ type: "", message: "" }), 3000);
+        }
+    };
+
     return (
         <div className="min-h-screen pt-10 mx-auto px-10 bg-gray-100">
+            {message.message && (
+                <div className={`fixed top-5 right-5 p-4 rounded-md ${
+                    message.type === "success" ? "bg-green-500" : "bg-red-500"
+                } text-white`}>
+                    {message.message}
+                </div>
+            )}
             {cartData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[50vh]">
-                    {/* Empty Cart Message */}
                     <div className="text-gray-500 mb-4">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -200,7 +250,10 @@ export default function CartScreen() {
                                 <span>Total:</span>
                                 <span>${subtotal}</span>
                             </div>
-                            <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                            <button 
+                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                                onClick={handleCheckout}
+                            >
                                 Proceed to Checkout
                             </button>
                         </div>
