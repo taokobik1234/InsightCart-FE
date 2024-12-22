@@ -74,7 +74,7 @@ export default function CartScreen() {
     const debouncedUpdateCartAPI = useCallback(
         debounce((updatedCart) => {
             updateCartAPI(updatedCart);
-        }, 5000), // Delay of 500ms
+        }, 300),
         []
     );
 

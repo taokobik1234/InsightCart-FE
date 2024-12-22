@@ -129,7 +129,7 @@ export default function Header() {
               </div>
             </li>
             <li>
-              <TiShoppingCart size={25} className='cursor-pointer' onClick={handleCartClick} />
+              <TiShoppingCart size={25} className='cursor-pointer text-white' onClick={handleCartClick} />
             </li>
             <li>
               {isAuthenticated ? <UserMenu /> : <Link to="/auth/sign-in" style={{ textDecoration: 'none', color: 'inherit' }}>Sign In</Link>}
