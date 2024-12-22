@@ -35,6 +35,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import DotLoader from "../../components/ui/DotLoader";
+import { updateSourceFile } from "typescript";
 const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   <Box
     display="flex"
@@ -62,8 +63,8 @@ const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   </Box>
 );
 
-const ProductsTable = ({ products ,setProducts, user}) => { 
-   
+const ProductsTable = ({ products ,setProducts, user, categories}) => { 
+  const[openEddit,setopenEdit] = useState(false)  
   const[openDelete,setopenDelete] = useState(false) 
   const[id,setId] = useState(null) 
   const DeleteProducts = async () => {
@@ -124,7 +125,10 @@ const ProductsTable = ({ products ,setProducts, user}) => {
             <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
             <TableCell align="center">
               <Box display="flex" flexDirection="column" alignItems="center">
-                <Button variant="text" color="primary" size="small">
+                <Button variant="text" color="primary" size="small"onClick={() => {
+                  setopenEdit(true);
+                  setId(product.id);
+                }}>
                   Edit
                 </Button>
                 <Button variant="text" color="error" size="small" onClick={() => {
@@ -164,6 +168,8 @@ const ProductsTable = ({ products ,setProducts, user}) => {
       </Button>
     </DialogActions>
   </Dialog>   
+  <AddEditProductDialog open={openEddit} categories={categories}
+        user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog> 
   </Box>  
 );
 } 
@@ -230,7 +236,7 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
     </Box>
   );
 };
-const AddProductDialog = ({ open, handleClose, categories, user }) => {
+const AddEditProductDialog = ({ open, handleClose, categories, user ,title, product_id}) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
     category_ids: "",
@@ -257,8 +263,41 @@ const AddProductDialog = ({ open, handleClose, categories, user }) => {
     const numericPrice = formData.price.replace(/\./g, "");
     const dataToSubmit = { ...formData, price: parseInt(numericPrice, 10) };
     console.log("Submitted Data:", dataToSubmit);
-    createProduct();
+    if(title == "Add Product" )createProduct();
+    else updateProduct();
   };
+  const updateProduct = async () => {
+    try {
+      const response = await fetch(
+        `http://tancatest.me/api/v1/shops/products/update `,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          },
+          body: JSON.stringify({
+            id: product_id, 
+            name: formData.name,
+            price: formData.price,
+            reorder_level: formData.reorder_level,
+            reorder_quantity: formData.reorder_quantity,
+            stock_level: formData.stock_level,
+            media_ids: formData.media_ids,
+            category_ids: formData.category_ids,
+          }),
+        }
+      )
+        .then((response) => response.json())
+        .then((response) => response.data);
+
+      handleClose();
+    } catch (error) {
+      console.log(error);
+    }
+  }; 
 
   const createProduct = async () => {
     try {
@@ -293,7 +332,7 @@ const AddProductDialog = ({ open, handleClose, categories, user }) => {
   };
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add Product</DialogTitle>
+      <DialogTitle> {title}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
           <Grid item xs={8}>
@@ -822,7 +861,7 @@ export default function ViewYourShop() {
     console.log (shop.id)
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
+        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id} `,
         { 
           headers: {
             "Content-Type": "application/json",
@@ -862,9 +901,10 @@ export default function ViewYourShop() {
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
       />
-      <ProductsTable products={products} setProducts={setproducts} user={user}></ProductsTable>
-      <AddProductDialog
+      <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
+      <AddEditProductDialog
         open={open}
+        title = "Add Product" 
         handleClose={() => setOpen(false)}
         categories={categories}
         user={user}
