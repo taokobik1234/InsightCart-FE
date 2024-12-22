@@ -63,6 +63,7 @@ const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
 );
 
 const ProductsTable = ({ products ,setProducts, user}) => { 
+   
   const[openDelete,setopenDelete] = useState(false) 
   const[id,setId] = useState(null) 
   const DeleteProducts = async () => {
@@ -84,7 +85,7 @@ const ProductsTable = ({ products ,setProducts, user}) => {
     } catch (error) {
       console.error(error);
     }
-  };  
+  };   
    return(
     <Box> 
    <TableContainer component={Card}>
@@ -112,7 +113,7 @@ const ProductsTable = ({ products ,setProducts, user}) => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {products.map((product) => (
+        {!products? null :products.map((product) => (
           <TableRow key={product.id}  >
             <TableCell align="center">{product.id}</TableCell>
             <TableCell align="center">{product.name}</TableCell>
@@ -422,12 +423,12 @@ const ViewShopDialog = ({
         media_ids: shop.avatar_obj.url,
       });
     }
-  }, [open, shop]);
-  const [successMessage, setSuccessMessage] = useState("");
+  }, [open, shop]); 
   const [selectedFileName, setSelectedFileName] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const DeleteShop = async () => {
     try {
@@ -444,6 +445,7 @@ const ViewShopDialog = ({
         .then((res) => res.data);
       dispatch(setShop(null));
       setOpenDelete(false);
+      navigate("/user/create-shop") 
     } catch (error) {
       console.error(error);
     }
@@ -820,7 +822,7 @@ export default function ViewYourShop() {
     console.log (shop.id)
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=671cb859fb04eff50015bf06  `,
+        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
         { 
           headers: {
             "Content-Type": "application/json",
@@ -841,7 +843,7 @@ export default function ViewYourShop() {
   };
    
   if (!shop) return null;
-  if (shop.is_verified === true)
+  if (shop.is_verified === false)
     return (
       <WaitApprovrMessege
         isNonMobileScreens={isNonMobileScreens}

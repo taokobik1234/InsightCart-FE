@@ -5,6 +5,7 @@ import {
     Button,
   } from "@mui/material"; 
 import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } from '@mui/material';
+import {  Menu, MenuItem } from '@mui/material';
 
   import { useParams  } from "react-router-dom";
  
@@ -23,6 +24,21 @@ import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } fro
     const [categories, setCategories] = useState([]);
     const [products, setproducts] = useState([]); 
     const [productss, setproductss] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null); // Menu anchor element
+    const [sortOrder, setSortOrder] = useState("Low to High"); // Default sort order
+  
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget); // Open the menu when the button is clicked
+    };
+  
+    const handleClose = () => {
+      setAnchorEl(null); // Close the menu when an option is selected
+    };
+  
+    const handleSortChange = (order) => {
+      setSortOrder(order); // Update the sort order based on selection
+      handleClose();
+    }; 
     const fetchShop = async () => {
       try { 
         const shop = await fetch(`http://tancatest.me/api/v1/shops/${shopId}`, {
@@ -125,6 +141,7 @@ import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } fro
                     <div className="w-20 h-20 rounded-full overflow-hidden">
                         <img
                             src={shop.avatar_obj.url || "https://via.placeholder.com/64"}
+                            height= {100}  
                             alt="Shop Logo"
                             className="w-full h-full object-cover"
                         />
@@ -243,7 +260,41 @@ import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } fro
            
           {/* ALL Product */}
           <Box  id="all-products-section" ref={allProductsRef} sx={{ padding: 2 }}>
+            <Box display="flex" flexDirection="row" justifyContent="space-between"  mb={2}>  
             <Typography variant="h5">All Product </Typography>
+             <Box display="flex" flexDirection="row "  justifyContent="space-between" gap={2} mb={2}> 
+            <Typography variant="h7" >Sort by:  </Typography> 
+            <Button    variant="text" color="primary" size="small"  onClick={()=> setproducts([...products].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))) } >
+ 
+                    Newest
+             </Button>
+             <Button    variant="text" color="primary" size="small"   >
+                     Topseller
+             </Button>
+             <Button
+        variant="text"
+        color="primary"
+        size="small"
+        onClick={handleClick}
+      >
+        Sort by: {sortOrder}
+      </Button>
+
+      {/* Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => {handleSortChange("Low to High"); setproducts([...products].sort((a, b) => a.price - b.price))}  }>
+          Low to High
+        </MenuItem>
+        <MenuItem onClick={() => {handleSortChange("High to Low"); setproducts([...products].sort((a, b) => b.price - a.price))}  }>
+          High to Low
+        </MenuItem>
+      </Menu> 
+            </Box> 
+            </Box> 
             <Typography variant="h6"gutterBottom>Categories:   </Typography>
 
             <Box display="flex" flexDirection="row"   mb={2}>
@@ -271,7 +322,12 @@ import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } fro
              <Grid container spacing={2}>
               {products.map((product) => (
                 <Grid item  xs={6} sm={4} md={3} key={product}>
-                  <Card onClick={() => navigate(`/products/details/${product.id}`)} >
+                  <Card onClick={() => navigate(`/products/details/${product.id}`)} sx={{ 
+                        '&:hover': {
+                        cursor: 'pointer',
+                        boxShadow: 3,
+                        },
+                    }}>
                     <CardMedia
                       component="img"
                       width="100%"

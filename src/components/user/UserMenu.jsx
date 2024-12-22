@@ -8,6 +8,7 @@ import  { useState, useEffect } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
 import { logout } from '../../store/authslice';
 import { setUser, setUserMedia } from '../../store/userslice';
+import { setShop } from "../../store/shopSlice"; 
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 export default function UserMenu() {
@@ -27,6 +28,7 @@ export default function UserMenu() {
     dispatch(logout());
     dispatch(setUser(null));
     dispatch(setUserMedia(null));
+    dispatch(setShop(null)); 
     navigate('/');
   };
  
