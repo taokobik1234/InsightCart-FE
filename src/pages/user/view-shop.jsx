@@ -173,15 +173,21 @@ const ProductsTable = ({ products ,setProducts, user, categories}) => {
   </Box>  
 );
 } 
-const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => { 
-  const [previewUrl, setPreviewUrl] = useState(url);
+const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
+  const [previewUrls, setPreviewUrls] = useState(url ? [url] : []);
+  const [error, setError] = useState(null);
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) { 
-      setPreviewUrl(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      // Update previews
+      const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+      setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+      setError(null);
+
       const formData = new FormData();
-      formData.append("files", file);
+      files.forEach((file) => formData.append("files", file)); 
+
       try {
         const response = await fetch("http://tancatest.me/api/v1/media", {
           method: "POST",
@@ -194,45 +200,59 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to upload image. Please try again.");
+          throw new Error("Failed to upload images. Please try again.");
         }
 
         const result = await response.json();
         console.log("Upload result:", result);
+
+        // Pass uploaded data and filenames to parent
         onUpload(result.data);
-        onFileNameChange(file.name);
+        const fileNames = files.map((file) => file.name);
+        onFileNameChange(fileNames);
       } catch (error) {
         console.error("Upload error:", error);
+        setError(error.message);
       }
     }
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+    <Box display="flex" flexDirection="column" gap={2} alignItems="center" width="100%">
       <Button variant="outlined" component="label">
-        Upload Image
+        Upload Images
         <input
           type="file"
           hidden
           accept="image/*"
+          multiple
           onChange={handleFileChange}
         />
       </Button>
 
-      {previewUrl && (
-        <Box
-          component="img"
-          src={previewUrl}
-          alt="Preview"
-          sx={{
-            width: "100%",
-            maxHeight: 200,
-            objectFit: "contain",
-            borderRadius: 1,
-            border: "1px solid #ddd",
-          }}
-        />
+      {error && (
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
       )}
+
+      <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mt={2}>
+        {previewUrls.map((url, index) => (
+          <Box
+            key={index}
+            component="img"
+            src={url}
+            alt={`Preview ${index + 1}`}
+            sx={{
+              width: 100,
+              height: 100,
+              objectFit: "cover",
+              borderRadius: 1,
+              border: "1px solid #ddd",
+            }}
+          />
+        ))}
+      </Box>
     </Box>
   );
 };
@@ -861,7 +881,7 @@ export default function ViewYourShop() {
     console.log (shop.id)
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id} `,
+        `http://tancatest.me/api/v1/shops/products?shop_id=671cb859fb04eff50015bf06 `,
         { 
           headers: {
             "Content-Type": "application/json",
@@ -882,7 +902,7 @@ export default function ViewYourShop() {
   };
    
   if (!shop) return null;
-  if (shop.is_verified === false)
+  if (shop.is_verified === true)
     return (
       <WaitApprovrMessege
         isNonMobileScreens={isNonMobileScreens}
