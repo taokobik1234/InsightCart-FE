@@ -37,7 +37,6 @@ export default function CheckoutPage() {
     useEffect(() => {
         fetchAddresses();
 
-        // Calculate and update remaining time
         const updateRemainingTime = () => {
             const expireDate = new Date(checkoutData.expired_at);
             const now = new Date();
@@ -61,10 +60,17 @@ export default function CheckoutPage() {
         };
 
         updateRemainingTime();
-        const timer = setInterval(updateRemainingTime, 60000); // Update every minute
+        const timer = setInterval(updateRemainingTime, 60000);
 
         return () => clearInterval(timer);
     }, [checkoutData.expired_at]);
+
+    const showMessage = (type, msg) => {
+        setMessage({ type, message: msg });
+        setTimeout(() => {
+            setMessage({ type: '', message: '' });
+        }, 3000);
+    };
 
     const fetchAddresses = async () => {
         try {
@@ -86,7 +92,6 @@ export default function CheckoutPage() {
             }
         } catch (error) {
             console.error('Error fetching addresses:', error);
-            setMessage({ type: 'error', message: 'Failed to load addresses' });
         }
     };
 
@@ -104,7 +109,7 @@ export default function CheckoutPage() {
             });
             const data = await response.json();
             if (data.message === 'Success') {
-                setMessage({ type: 'success', message: 'Address added successfully' });
+                showMessage('success', 'Address added successfully');
                 setIsAddressDialogOpen(false);
                 fetchAddresses();
                 setNewAddress({
@@ -115,17 +120,17 @@ export default function CheckoutPage() {
                     isDefault: false
                 });
             } else {
-                setMessage({ type: 'error', message: data.message || 'Failed to add address' });
+                showMessage('error', data.message || 'Failed to add address');
             }
         } catch (error) {
             console.error('Error adding address:', error);
-            setMessage({ type: 'error', message: 'Failed to add address' });
+            showMessage('error', 'Failed to add address');
         }
     };
 
     const handlePlaceOrder = async () => {
         if (!selectedAddress) {
-            setMessage({ type: 'error', message: 'Please select a delivery address' });
+            showMessage('error', 'Please select a delivery address');
             return;
         }
 
@@ -150,7 +155,7 @@ export default function CheckoutPage() {
             const data = await response.json();
             
             if (data.message === 'Success') {
-                setMessage({ type: 'success', message: 'Order placed successfully!' });
+                showMessage('success', 'Order placed successfully!');
                 
                 if (paymentMethod === 'card') {
                     window.location.href = data.data.payment_url;
@@ -160,11 +165,11 @@ export default function CheckoutPage() {
                     }, 2000);
                 }
             } else {
-                setMessage({ type: 'error', message: data.message || 'Failed to place order' });
+                showMessage('error', data.message || 'Failed to place order');
             }
         } catch (error) {
             console.error('Error placing order:', error);
-            setMessage({ type: 'error', message: 'Failed to place order. Please try again.' });
+            showMessage('error', 'Failed to place order. Please try again.');
         }
     };
 
@@ -194,39 +199,45 @@ export default function CheckoutPage() {
                         <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
                             <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
                             <div className="space-y-4">
-                                {addresses.map((addr) => (
-                                    <label
-                                        key={addr.id}
-                                        className={`block p-4 border rounded-lg cursor-pointer ${
-                                            selectedAddress === addr.id
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-gray-200'
-                                        }`}
-                                    >
-                                        <div className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="address"
-                                                value={addr.id}
-                                                checked={selectedAddress === addr.id}
-                                                onChange={(e) => setSelectedAddress(e.target.value)}
-                                                className="mr-3"
-                                            />
-                                            <div>
-                                                <p className="font-medium">{addr.street}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    {addr.district}, {addr.city}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    Phone: {addr.phone}
-                                                </p>
-                                                {addr.isDefault && (
-                                                    <span className="text-sm text-blue-600">Default Address</span>
-                                                )}
+                                {addresses.length === 0 ? (
+                                    <p className="text-yellow-500 font-medium mb-4">
+                                        Please add your address to complete the order
+                                    </p>
+                                ) : (
+                                    addresses.map((addr) => (
+                                        <label
+                                            key={addr.id}
+                                            className={`block p-4 border rounded-lg cursor-pointer ${
+                                                selectedAddress === addr.id
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-200'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="address"
+                                                    value={addr.id}
+                                                    checked={selectedAddress === addr.id}
+                                                    onChange={(e) => setSelectedAddress(e.target.value)}
+                                                    className="mr-3"
+                                                />
+                                                <div>
+                                                    <p className="font-medium">{addr.street}</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {addr.district}, {addr.city}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        Phone: {addr.phone}
+                                                    </p>
+                                                    {addr.isDefault && (
+                                                        <span className="text-sm text-blue-600">Default Address</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </label>
-                                ))}
+                                        </label>
+                                    ))
+                                )}
                                 <button 
                                     className="text-blue-600 hover:text-blue-800"
                                     onClick={() => setIsAddressDialogOpen(true)}
@@ -279,34 +290,53 @@ export default function CheckoutPage() {
                         <div className="bg-white p-6 rounded-lg shadow-sm">
                             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                             
-                            <div className="space-y-4 mb-6">
+                            <div className="space-y-6 mb-6">
                                 {checkoutData.items.map((item) => (
-                                    <div key={item.checkout_id}>
-                                        <h3 className="font-medium mb-2">{item.shop_objects.shop_name}</h3>
-                                        {item.product_list.map((product) => (
-                                            <div key={product.product_id} className="flex justify-between items-center mb-2">
-                                                <div className="flex items-center">
+                                    <div key={item.checkout_id} className="bg-gray-50 p-4 rounded-lg">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-blue-600">
+                                                {item.shop_objects.shop_name}
+                                            </h3>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            {item.product_list.map((product) => (
+                                                <div key={product.product_id} className="flex gap-4 p-3 bg-white rounded-lg shadow-sm">
                                                     <img
                                                         src={product.product_image}
                                                         alt={product.product_name}
-                                                        className="w-12 h-12 object-cover rounded mr-3"
+                                                        className="w-20 h-20 object-cover rounded-lg"
                                                     />
-                                                    <div>
-                                                        <p className="font-medium">{product.product_name}</p>
-                                                        <p className="text-sm text-gray-500">
-                                                            Qty: {product.quantity} x ${product.price}
-                                                        </p>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-medium text-gray-900 mb-1">
+                                                            {product.product_name}
+                                                        </h4>
+                                                        <div className="flex justify-between items-center">
+                                                            <p className="text-sm text-gray-600">
+                                                                Quantity: {product.quantity}
+                                                            </p>
+                                                            <div className="text-right">
+                                                                <p className="text-sm text-gray-500">
+                                                                    ${product.price} each
+                                                                </p>
+                                                                <p className="font-semibold text-blue-600">
+                                                                    ${(product.quantity * product.price).toFixed(2)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <p className="font-medium">
-                                                    ${(product.quantity * product.price).toFixed(2)}
-                                                </p>
-                                            </div>
-                                        ))}
-                                        <div className="text-right font-medium mt-2">
-                                            Subtotal: ${item.price}
+                                            ))}
                                         </div>
-                                        <hr className="my-4" />
+                                        
+                                        <div className="mt-4 pt-3 border-t border-gray-200">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Shop Subtotal:</span>
+                                                <span className="text-lg font-semibold text-blue-600">
+                                                    ${item.price}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -341,7 +371,6 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
-            {/* Add Address Dialog */}
             <Dialog open={isAddressDialogOpen} onClose={() => setIsAddressDialogOpen(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Add New Address</DialogTitle>
                 <DialogContent>
@@ -392,4 +421,4 @@ export default function CheckoutPage() {
             </Dialog>
         </div>
     );
-} 
+}

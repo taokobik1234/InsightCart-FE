@@ -3,12 +3,15 @@ import { useSelector } from "react-redux";
 import { ImBin } from "react-icons/im";
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 export default function CartScreen() {
     const { user } = useSelector((state) => state.auth);
     const [cartData, setCartData] = useState([]);
     const [subtotal, setSubtotal] = useState(0);
     const [message, setMessage] = useState({ type: "", message: "" });
+    const [isLoading, setIsLoading] = useState(false);
+    const [isPageLoading, setIsPageLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,6 +31,8 @@ export default function CartScreen() {
                 calculateSubtotal(data.data.item || []);
             } catch (error) {
                 console.error("Error fetching cart data:", error);
+            } finally {
+                setIsPageLoading(false);
             }
         };
 
@@ -102,6 +107,7 @@ export default function CartScreen() {
     };
 
     const handleCheckout = async () => {
+        setIsLoading(true);
         try {
             const productIds = cartData.flatMap(shop => 
                 shop.item.map(product => product.product_id)
@@ -139,8 +145,18 @@ export default function CartScreen() {
             console.error("Error during checkout:", error);
             setMessage({ type: "error", message: "An error occurred during checkout" });
             setTimeout(() => setMessage({ type: "", message: "" }), 3000);
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    if (isPageLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <CircularProgress />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pt-10 mx-auto px-10 bg-gray-100">
@@ -251,10 +267,18 @@ export default function CartScreen() {
                                 <span>${subtotal}</span>
                             </div>
                             <button 
-                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 relative"
                                 onClick={handleCheckout}
+                                disabled={isLoading}
                             >
-                                Proceed to Checkout
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center">
+                                        <CircularProgress size={24} color="inherit" />
+                                        <span className="ml-2">Processing...</span>
+                                    </div>
+                                ) : (
+                                    "Proceed to Checkout"
+                                )}
                             </button>
                         </div>
                     </div>
