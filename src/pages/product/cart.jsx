@@ -113,7 +113,7 @@ export default function CartScreen() {
                 shop.item.map(product => product.product_id)
             );
 
-            const response = await fetch("http://tancatest.me/api/v1/checkout", {
+            const response = await fetch("http://tancatest.me/api/v1/order/checkout", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
