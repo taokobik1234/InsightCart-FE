@@ -8,31 +8,33 @@ import {
     DialogActions,
     TextField,
     Button,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
+    Checkbox,
+    FormControlLabel,
 } from '@mui/material';
 
 export default function CheckoutPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useSelector((state) => state.auth);
+    const userAuth = useSelector((state) => state.auth.user);
     const { checkoutData, cartData } = location.state || {};
     
     const [selectedAddress, setSelectedAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [addresses, setAddresses] = useState([]);
     const [message, setMessage] = useState({ type: '', message: '' });
-    const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
-    const [newAddress, setNewAddress] = useState({
+    const [openDialog, setOpenDialog] = useState(false);
+    const [openAddressListDialog, setOpenAddressListDialog] = useState(false);
+    const [addressInput, setAddressInput] = useState({
         street: '',
         district: '',
         city: '',
+        province: '',
         phone: '',
-        isDefault: false
+        default: false
     });
     const [remainingTime, setRemainingTime] = useState('');
+    const [isExpired, setIsExpired] = useState(false);
+    const [defaultAddress, setDefaultAddress] = useState(null);
 
     useEffect(() => {
         fetchAddresses();
@@ -44,23 +46,26 @@ export default function CheckoutPage() {
 
             if (diff <= 0) {
                 setRemainingTime('Expired');
+                setIsExpired(true);
                 return;
             }
 
-            const minutes = Math.floor((diff / 1000 / 60) % 60);
-            const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
-            const days = Math.floor(diff / 1000 / 60 / 60 / 24);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
             let timeStr = '';
             if (days > 0) timeStr += `${days}d `;
             if (hours > 0) timeStr += `${hours}h `;
-            timeStr += `${minutes}m`;
+            if (minutes > 0) timeStr += `${minutes}m `;
+            timeStr += `${seconds}s`;
 
             setRemainingTime(timeStr);
         };
 
         updateRemainingTime();
-        const timer = setInterval(updateRemainingTime, 60000);
+        const timer = setInterval(updateRemainingTime, 1000);
 
         return () => clearInterval(timer);
     }, [checkoutData.expired_at]);
@@ -74,20 +79,20 @@ export default function CheckoutPage() {
 
     const fetchAddresses = async () => {
         try {
-            const response = await fetch('http://tancatest.me/api/v1/user/addresses', {
+            const response = await fetch(`http://tancatest.me/api/v1/users/${userAuth.id}`, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'session-id': user.session_id,
-                    'Authorization': `Bearer ${user.token.AccessToken}`,
-                    'x-client-id': user.id
+                    "Authorization": `Bearer ${userAuth.token.AccessToken}`,
+                    "x-client-id": userAuth.id,
+                    "session-id": userAuth.session_id,
                 }
             });
             const data = await response.json();
-            if (data.message === 'Success') {
-                setAddresses(data.data.addresses || []);
-                const defaultAddr = data.data.addresses.find(addr => addr.isDefault);
+            if (data.error_code === 0) {
+                setAddresses(data.data.addressess || []);
+                const defaultAddr = data.data.addressess.find(addr => addr.default);
                 if (defaultAddr) {
                     setSelectedAddress(defaultAddr.id);
+                    setDefaultAddress(defaultAddr);
                 }
             }
         } catch (error) {
@@ -95,40 +100,65 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleAddAddress = async () => {
-        try {
-            const response = await fetch('http://tancatest.me/api/v1/user/addresses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'session-id': user.session_id,
-                    'Authorization': `Bearer ${user.token.AccessToken}`,
-                    'x-client-id': user.id
-                },
-                body: JSON.stringify(newAddress)
+    const handleAddressDialog = (address = null) => {
+        if (address) {
+            setSelectedAddress(address);
+            setAddressInput(address);
+        } else {
+            setSelectedAddress(null);
+            setAddressInput({
+                street: '',
+                district: '',
+                city: '',
+                province: '',
+                phone: '',
+                default: false
             });
+        }
+        setOpenDialog(true);
+    };
+
+    const handleSaveAddress = async () => {
+        try {
+            const method = selectedAddress ? "PATCH" : "POST";
+            const url = "http://tancatest.me/api/v1/users/address";
+
+            const requestBody = selectedAddress 
+                ? { ...addressInput, id: selectedAddress.id }
+                : addressInput;
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    "Authorization": `Bearer ${userAuth.token.AccessToken}`,
+                    "x-client-id": userAuth.id,
+                    "session-id": userAuth.session_id,
+                    "Content-Type": "application/json",
+                    "Accept": "*/*",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                body: JSON.stringify(requestBody),
+            });
+
             const data = await response.json();
-            if (data.message === 'Success') {
-                showMessage('success', 'Address added successfully');
-                setIsAddressDialogOpen(false);
+            if (data.error_code === 0) {
                 fetchAddresses();
-                setNewAddress({
-                    street: '',
-                    district: '',
-                    city: '',
-                    phone: '',
-                    isDefault: false
-                });
-            } else {
-                showMessage('error', data.message || 'Failed to add address');
+                setOpenDialog(false);
+                showMessage('success', selectedAddress ? "Address updated successfully!" : "Address added successfully!");
             }
         } catch (error) {
-            console.error('Error adding address:', error);
-            showMessage('error', 'Failed to add address');
+            console.error('Error saving address:', error);
+            showMessage('error', 'Failed to save address');
         }
     };
 
     const handlePlaceOrder = async () => {
+        if (isExpired) {
+            showMessage('error', 'This checkout session has expired. Please return to cart.');
+            return;
+        }
+
         if (!selectedAddress) {
             showMessage('error', 'Please select a delivery address');
             return;
@@ -145,9 +175,9 @@ export default function CheckoutPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'session-id': user.session_id,
-                    'Authorization': `Bearer ${user.token.AccessToken}`,
-                    'x-client-id': user.id
+                    'session-id': userAuth.session_id,
+                    'Authorization': `Bearer ${userAuth.token.AccessToken}`,
+                    'x-client-id': userAuth.id
                 },
                 body: JSON.stringify(orderData)
             });
@@ -173,6 +203,17 @@ export default function CheckoutPage() {
         }
     };
 
+    const handleBackToCart = () => {
+        navigate('/cart');
+    };
+
+    const handleSelectAddress = (addressId) => {
+        setSelectedAddress(addressId);
+        const selected = addresses.find(addr => addr.id === addressId);
+        setDefaultAddress(selected);
+        setOpenAddressListDialog(false);
+    };
+
     if (!checkoutData || !cartData) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -194,57 +235,48 @@ export default function CheckoutPage() {
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold mb-8">Checkout</h1>
                 
+                {isExpired && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+                        <strong className="font-bold">Checkout Expired! </strong>
+                        <span className="block sm:inline">This checkout session has expired. Please return to cart and try again.</span>
+                        <button
+                            onClick={handleBackToCart}
+                            className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                            Back to Cart
+                        </button>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-                            <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
-                            <div className="space-y-4">
-                                {addresses.length === 0 ? (
-                                    <p className="text-yellow-500 font-medium mb-4">
-                                        Please add your address to complete the order
-                                    </p>
-                                ) : (
-                                    addresses.map((addr) => (
-                                        <label
-                                            key={addr.id}
-                                            className={`block p-4 border rounded-lg cursor-pointer ${
-                                                selectedAddress === addr.id
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200'
-                                            }`}
-                                        >
-                                            <div className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="address"
-                                                    value={addr.id}
-                                                    checked={selectedAddress === addr.id}
-                                                    onChange={(e) => setSelectedAddress(e.target.value)}
-                                                    className="mr-3"
-                                                />
-                                                <div>
-                                                    <p className="font-medium">{addr.street}</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {addr.district}, {addr.city}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Phone: {addr.phone}
-                                                    </p>
-                                                    {addr.isDefault && (
-                                                        <span className="text-sm text-blue-600">Default Address</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </label>
-                                    ))
-                                )}
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold">Delivery Address</h2>
                                 <button 
                                     className="text-blue-600 hover:text-blue-800"
-                                    onClick={() => setIsAddressDialogOpen(true)}
+                                    onClick={() => setOpenAddressListDialog(true)}
+                                    disabled={isExpired}
                                 >
-                                    + Add New Address
+                                    Change Address
                                 </button>
                             </div>
+                            
+                            {defaultAddress ? (
+                                <div className="p-4 border rounded-lg">
+                                    <p className="font-medium">{defaultAddress.street}</p>
+                                    <p className="text-sm text-gray-500">
+                                        {defaultAddress.district}, {defaultAddress.city}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        Phone: {defaultAddress.phone}
+                                    </p>
+                                </div>
+                            ) : (
+                                <p className="text-yellow-500 font-medium">
+                                    Please add your address to complete the order
+                                </p>
+                            )}
                         </div>
 
                         <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -259,6 +291,7 @@ export default function CheckoutPage() {
                                             checked={paymentMethod === 'cod'}
                                             onChange={(e) => setPaymentMethod(e.target.value)}
                                             className="mr-3"
+                                            disabled={isExpired}
                                         />
                                         <div>
                                             <p className="font-medium">Cash on Delivery</p>
@@ -275,6 +308,7 @@ export default function CheckoutPage() {
                                             checked={paymentMethod === 'card'}
                                             onChange={(e) => setPaymentMethod(e.target.value)}
                                             className="mr-3"
+                                            disabled={isExpired}
                                         />
                                         <div>
                                             <p className="font-medium">Credit/Debit Card</p>
@@ -357,13 +391,20 @@ export default function CheckoutPage() {
                                 
                                 <button
                                     onClick={handlePlaceOrder}
-                                    className="w-full bg-blue-600 text-white py-3 rounded-lg mt-6 hover:bg-blue-700"
+                                    className={`w-full py-3 rounded-lg mt-6 ${
+                                        isExpired 
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-600 hover:bg-blue-700'
+                                    } text-white`}
+                                    disabled={isExpired}
                                 >
-                                    Place Order
+                                    {isExpired ? 'Checkout Expired' : 'Place Order'}
                                 </button>
                                 
-                                <p className="text-lg font-semibold text-red-500 mt-4 text-center">
-                                    Order expires in: {remainingTime}
+                                <p className={`text-lg font-semibold mt-4 text-center ${
+                                    isExpired ? 'text-red-500' : 'text-red-500'
+                                }`}>
+                                    {isExpired ? 'Checkout has expired' : `Order expires in: ${remainingTime}`}
                                 </p>
                             </div>
                         </div>
@@ -371,51 +412,113 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
-            <Dialog open={isAddressDialogOpen} onClose={() => setIsAddressDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Add New Address</DialogTitle>
+            {/* Address List Dialog */}
+            <Dialog 
+                open={openAddressListDialog} 
+                onClose={() => setOpenAddressListDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Select Delivery Address</DialogTitle>
                 <DialogContent>
                     <div className="space-y-4 mt-4">
-                        <TextField
-                            fullWidth
-                            label="Street Address"
-                            value={newAddress.street}
-                            onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                        />
-                        <TextField
-                            fullWidth
-                            label="District"
-                            value={newAddress.district}
-                            onChange={(e) => setNewAddress({ ...newAddress, district: e.target.value })}
-                        />
-                        <TextField
-                            fullWidth
-                            label="City"
-                            value={newAddress.city}
-                            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Phone Number"
-                            value={newAddress.phone}
-                            onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                        />
-                        <FormControl fullWidth>
-                            <InputLabel>Set as Default</InputLabel>
-                            <Select
-                                value={newAddress.isDefault}
-                                label="Set as Default"
-                                onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.value })}
+                        {addresses.map((addr) => (
+                            <div
+                                key={addr.id}
+                                className={`p-4 border rounded-lg cursor-pointer ${
+                                    selectedAddress === addr.id ? 'border-blue-500 bg-blue-50' : ''
+                                }`}
+                                onClick={() => handleSelectAddress(addr.id)}
                             >
-                                <MenuItem value={true}>Yes</MenuItem>
-                                <MenuItem value={false}>No</MenuItem>
-                            </Select>
-                        </FormControl>
+                                <p className="font-medium">{addr.street}</p>
+                                <p className="text-sm text-gray-500">
+                                    {addr.district}, {addr.city}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Phone: {addr.phone}
+                                </p>
+                                {addr.default && (
+                                    <span className="text-sm text-blue-600">Default Address</span>
+                                )}
+                            </div>
+                        ))}
+                        <button 
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => {
+                                setOpenAddressListDialog(false);
+                                handleAddressDialog();
+                            }}
+                        >
+                            + Add New Address
+                        </button>
                     </div>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setIsAddressDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleAddAddress} variant="contained" color="primary">
-                        Add Address
+                    <Button onClick={() => setOpenAddressListDialog(false)}>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Add/Edit Address Dialog */}
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ borderBottom: '1px solid #eee' }}>
+                    {selectedAddress ? 'Edit Address' : 'Add New Address'}
+                </DialogTitle>
+                <DialogContent sx={{ mt: 2 }}>
+                    <TextField
+                        margin="dense"
+                        label="Street"
+                        fullWidth
+                        value={addressInput.street}
+                        onChange={(e) => setAddressInput({...addressInput, street: e.target.value})}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="District"
+                        fullWidth
+                        value={addressInput.district}
+                        onChange={(e) => setAddressInput({...addressInput, district: e.target.value})}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="City"
+                        fullWidth
+                        value={addressInput.city}
+                        onChange={(e) => setAddressInput({...addressInput, city: e.target.value})}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Province"
+                        fullWidth
+                        value={addressInput.province}
+                        onChange={(e) => setAddressInput({...addressInput, province: e.target.value})}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Phone"
+                        fullWidth
+                        value={addressInput.phone}
+                        onChange={(e) => setAddressInput({...addressInput, phone: e.target.value})}
+                    />
+                    <FormControlLabel
+                        sx={{ mt: 1 }}
+                        control={
+                            <Checkbox
+                                checked={addressInput.default}
+                                onChange={(e) => setAddressInput({...addressInput, default: e.target.checked})}
+                                color="primary"
+                            />
+                        }
+                        label="Set as default address"
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
+                    <Button onClick={() => setOpenDialog(false)} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveAddress} variant="contained">
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
