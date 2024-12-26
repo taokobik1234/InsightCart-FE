@@ -154,7 +154,7 @@ export default function ResetPassword() {
                                         sx={{
                                             m: "2rem 0",
                                             p: "1rem",
-                                            backgroundColor: "#00D5FA",
+                                            backgroundColor: "#3B82F6",
                                             color: "#FFFFFF",
                                             "&:hover": { Opacity: 0.5 },
                                         }}

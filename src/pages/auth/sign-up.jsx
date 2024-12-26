@@ -127,7 +127,7 @@ export default function SignUp() {
                     sx={{
                       m: "2rem 0",
                       p: "1rem",
-                      backgroundColor: "#00D5FA",
+                      backgroundColor: "#3B82F6",
                       color: "#FFFFFF",
                       "&:hover": { Opacity: 0.5 },
                     }}
@@ -141,7 +141,7 @@ export default function SignUp() {
                     }}
                     sx={{
                       textDecoration: "underline",
-                      color: "#00D5FA",
+                      color: "#3B82F6",
                       "&:hover": {
                         cursor: "pointer",
                         color: "#E6FBFF",

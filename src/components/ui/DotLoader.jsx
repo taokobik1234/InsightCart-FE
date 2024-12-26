@@ -18,7 +18,7 @@ const DotLoader = () => {
           sx={{
             width: "10px",
             height: "10px",
-            backgroundColor: "#00D5FA",
+            backgroundColor: "#3B82F6",
             borderRadius: "50%",
             animation: "dot-flash 1.4s infinite ease-in-out",
             animationDelay: "0s",
@@ -28,7 +28,7 @@ const DotLoader = () => {
           sx={{
             width: "10px",
             height: "10px",
-            backgroundColor: "#00D5FA",
+            backgroundColor: "#3B82F6",
             borderRadius: "50%",
             animation: "dot-flash 1.4s infinite ease-in-out",
             animationDelay: "0.2s",
@@ -38,7 +38,7 @@ const DotLoader = () => {
           sx={{
             width: "10px",
             height: "10px",
-            backgroundColor: "#00D5FA",
+            backgroundColor: "#3B82F6",
             borderRadius: "50%",
             animation: "dot-flash 1.4s infinite ease-in-out",
             animationDelay: "0.4s",

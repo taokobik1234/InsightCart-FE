@@ -63,10 +63,10 @@ const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   </Box>
 );
 
-const ProductsTable = ({ products ,setProducts, user, categories}) => { 
-  const[openEddit,setopenEdit] = useState(false)  
-  const[openDelete,setopenDelete] = useState(false) 
-  const[id,setId] = useState(null) 
+const ProductsTable = ({ products, setProducts, user, categories }) => {
+  const [openEddit, setopenEdit] = useState(false)
+  const [openDelete, setopenDelete] = useState(false)
+  const [id, setId] = useState(null)
   const DeleteProducts = async () => {
     try {
       const res = await fetch("http://tancatest.me/api/v1/shops/products", {
@@ -77,103 +77,103 @@ const ProductsTable = ({ products ,setProducts, user, categories}) => {
           Authorization: `Bearer ${user.token.AccessToken}`,
           "x-client-id": user.id,
         },
-        body: JSON.stringify({ "ids": [id] }),  
-      }) 
+        body: JSON.stringify({ "ids": [id] }),
+      })
         .then((res) => res.json())
-        .then((res) => res.data); 
+        .then((res) => res.data);
       setProducts((prevProducts) => prevProducts.filter(product => product.id !== id));
       setopenDelete(false);
     } catch (error) {
       console.error(error);
     }
-  };   
-   return(
-    <Box> 
-   <TableContainer component={Card}>
-    <Table>
-      <TableHead>
-        <TableRow sx={{ backgroundColor: "#1976d2" }}>
-          {[
-            "ID",
-            "Name",
-            "Category",
-            "Price",
-            "Stock level",
-            "Reorder quantity",
-            "Reorder level",
-            "Action",
-          ].map((head) => (
-            <TableCell
-              key={head}
-              sx={{ fontWeight: "bold", color: "white" }}
-              align="center"
-            >
-              {head}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {!products? null :products.map((product) => (
-          <TableRow key={product.id}  >
-            <TableCell align="center">{product.id}</TableCell>
-            <TableCell align="center">{product.name}</TableCell>
-            <TableCell align="center">{product.category_objects[0].name}</TableCell>
-            <TableCell align="center">{product.price}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Button variant="text" color="primary" size="small"onClick={() => {
-                  setopenEdit(true);
-                  setId(product.id);
-                }}>
-                  Edit
-                </Button>
-                <Button variant="text" color="error" size="small" onClick={() => {
-            setopenDelete(true);
-            setId(product.id);
-          }}>
-                  Delete
-                </Button>
-              </Box>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table> 
-   </TableContainer>
-   <Dialog open={openDelete} onClose={() => setopenDelete(false)}
- fullWidth maxWidth="md">
-    <DialogTitle>Product Delete</DialogTitle>
-    <DialogContent></DialogContent>
-    <DialogActions>
-      <Button
-        onClick={() => {
-          setopenDelete(false); 
-        }}
-        color="secondary"
-      >
-        Cancel
-      </Button>
-      <Button 
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          DeleteProducts(); 
-        }} 
-      >
-        Confirm
-      </Button>
-    </DialogActions>
-  </Dialog>   
-  <AddEditProductDialog open={openEddit} categories={categories} setProducts={setProducts}
-        user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog> 
-  </Box>  
-);
-} 
-const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
+  };
+  return (
+    <Box>
+      <TableContainer component={Card}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#1976d2" }}>
+              {[
+                "ID",
+                "Name",
+                "Category",
+                "Price",
+                "Stock level",
+                "Reorder quantity",
+                "Reorder level",
+                "Action",
+              ].map((head) => (
+                <TableCell
+                  key={head}
+                  sx={{ fontWeight: "bold", color: "white" }}
+                  align="center"
+                >
+                  {head}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {!products ? null : products.map((product) => (
+              <TableRow key={product.id}  >
+                <TableCell align="center">{product.id}</TableCell>
+                <TableCell align="center">{product.name}</TableCell>
+                <TableCell align="center">{product.category_objects[0].name}</TableCell>
+                <TableCell align="center">{product.price}</TableCell>
+                <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
+                <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
+                <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
+                <TableCell align="center">
+                  <Box display="flex" flexDirection="column" alignItems="center">
+                    <Button variant="text" color="primary" size="small" onClick={() => {
+                      setopenEdit(true);
+                      setId(product.id);
+                    }}>
+                      Edit
+                    </Button>
+                    <Button variant="text" color="error" size="small" onClick={() => {
+                      setopenDelete(true);
+                      setId(product.id);
+                    }}>
+                      Delete
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Dialog open={openDelete} onClose={() => setopenDelete(false)}
+        fullWidth maxWidth="md">
+        <DialogTitle>Product Delete</DialogTitle>
+        <DialogContent></DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setopenDelete(false);
+            }}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              DeleteProducts();
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <AddEditProductDialog open={openEddit} categories={categories} setProducts={setProducts}
+        user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog>
+    </Box>
+  );
+}
+const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
   const [previewUrls, setPreviewUrls] = useState(url ? [url] : []);
   const [error, setError] = useState(null);
 
@@ -186,7 +186,7 @@ const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
       setError(null);
 
       const formData = new FormData();
-      files.forEach((file) => formData.append("files", file)); 
+      files.forEach((file) => formData.append("files", file));
 
       try {
         const response = await fetch("http://tancatest.me/api/v1/media", {
@@ -205,7 +205,7 @@ const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
 
         const result = await response.json();
         console.log("Upload result:", result);
- 
+
         const ids = result.data.map((item) => item.id);
         onUpload(ids);
         const fileNames = files.map((file) => file.name);
@@ -256,7 +256,7 @@ const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
     </Box>
   );
 };
-const AddEditProductDialog = ({ open, handleClose, categories, user ,title, product_id, setProducts,shop}) => {
+const AddEditProductDialog = ({ open, handleClose, categories, user, title, product_id, setProducts, shop }) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
     category_ids: "",
@@ -272,18 +272,18 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: 
-      name === "price"
-        ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
-        : value,
+      [name]:
+        name === "price"
+          ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+          : value,
 
     }));
   };
 
-  const handleSubmit = () => { 
-    if(title == "Add Product" )createProduct();
+  const handleSubmit = () => {
+    if (title == "Add Product") createProduct();
     else updateProduct();
-      
+
   };
   const updateProduct = async () => {
     try {
@@ -298,7 +298,7 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
             "x-client-id": user.id,
           },
           body: JSON.stringify({
-            id: product_id, 
+            id: product_id,
             name: formData.name,
             price: parseInt(String(formData.price).replace(/\./g, ""), 10),
             reorder_level: parseInt(formData.reorder_level, 10),
@@ -311,12 +311,12 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      fetchProduct()   
+      fetchProduct()
       handleClose();
     } catch (error) {
       console.log(error);
     }
-  }; 
+  };
 
   const createProduct = async () => {
     try {
@@ -343,37 +343,37 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      fetchProduct() 
+      fetchProduct()
       handleClose();
     } catch (error) {
       console.log(error);
     }
   };
-   
+
   const fetchProduct = async () => {
-    if (!shop) return null; 
-    console.log (shop.id)
+    if (!shop) return null;
+    console.log(shop.id)
     try {
       const response = await fetch(
         `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
-        { 
+        {
           headers: {
             "Content-Type": "application/json",
             "session-id": user.session_id,
             Authorization: `Bearer ${user.token.AccessToken}`,
             "x-client-id": user.id,
-          }, 
+          },
         }
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      console.log("Content-Type",response.products)   
-      setProducts(response.products)   
+      console.log("Content-Type", response.products)
+      setProducts(response.products)
     } catch (error) {
       console.log(error);
     }
-  }; 
-   
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle> {title}</DialogTitle>
@@ -506,7 +506,7 @@ const ViewShopDialog = ({
         media_ids: shop.avatar_obj.url,
       });
     }
-  }, [open, shop]); 
+  }, [open, shop]);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -528,7 +528,7 @@ const ViewShopDialog = ({
         .then((res) => res.data);
       dispatch(setShop(null));
       setOpenDelete(false);
-      navigate("/user/create-shop") 
+      navigate("/user/create-shop")
     } catch (error) {
       console.error(error);
     }
@@ -598,7 +598,7 @@ const ViewShopDialog = ({
                   }}
                   sx={{
                     textDecoration: "underline",
-                    color: "#00D5FA",
+                    color: "#3B82F6",
                     "&:hover": {
                       cursor: "pointer",
                       color: "#E6FBFF",
@@ -857,7 +857,7 @@ const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
           onClick={() => navigate("/auth/sign-in")}
           sx={{
             p: "1rem 2rem",
-            backgroundColor: "#00D5FA",
+            backgroundColor: "#3B82F6",
             color: "#FFFFFF",
             fontWeight: "600",
           }}
@@ -873,7 +873,7 @@ export default function ViewYourShop() {
   const { shop } = useSelector((state) => state.shop);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
-  const [products, setproducts] = useState([]); 
+  const [products, setproducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
 
@@ -887,44 +887,44 @@ export default function ViewYourShop() {
         },
       })
         .then((res) => res.json())
-        .then((res) => res.data); 
+        .then((res) => res.data);
       setCategories(cates.categories);
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   useEffect(() => {
     fetchCategories();
-    fetchProduct(); 
+    fetchProduct();
   }, [shop]);
 
- 
+
   const fetchProduct = async () => {
-    if (!shop) return null; 
-    console.log (shop.id)
+    if (!shop) return null;
+    console.log(shop.id)
     try {
       const response = await fetch(
         `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
-        { 
+        {
           headers: {
             "Content-Type": "application/json",
             "session-id": user.session_id,
             Authorization: `Bearer ${user.token.AccessToken}`,
             "x-client-id": user.id,
-          }, 
+          },
         }
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      console.log("Content-Type",response.products)   
-      setproducts(response.products)  
+      console.log("Content-Type", response.products)
+      setproducts(response.products)
       setOpen(false);
     } catch (error) {
       console.log(error);
     }
   };
-   
+
   if (!shop) return null;
   if (shop.is_verified === true)
     return (
@@ -945,19 +945,19 @@ export default function ViewYourShop() {
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
       />
-      { products.length == 0 ? 
-       <DotLoader></DotLoader>:
-       <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
+      {products.length == 0 ?
+        <DotLoader></DotLoader> :
+        <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
       }
-      
+
       <AddEditProductDialog
         open={open}
-        title = "Add Product" 
+        title="Add Product"
         handleClose={() => setOpen(false)}
         categories={categories}
-        user={user} 
+        user={user}
         setProducts={setproducts}
-        shop ={shop}  
+        shop={shop}
       />
       <ViewShopDialog
         shop={shop}

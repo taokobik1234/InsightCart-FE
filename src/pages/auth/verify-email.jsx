@@ -65,7 +65,7 @@ function VerifyEmail() {
                             m: "2rem 0",
                             p: "1rem",
                             backgroundColor: "#FFFFFF",
-                            color: "#00D5FA",
+                            color: "#3B82F6",
                             "&:hover": { cursor: "pointer" },
                         }}
                         variant="contained"
