@@ -92,7 +92,7 @@ import {  Menu, MenuItem } from '@mui/material';
       const fetchProduct = async () => { 
         try {
           const response = await fetch(
-            `http://tancatest.me/api/v1/shops/products?shop_id=671cb859fb04eff50015bf06 
+            `http://tancatest.me/api/v1/shops/products?shop_id=${shopId} 
             `,
             { 
               headers: {
@@ -351,7 +351,7 @@ import {  Menu, MenuItem } from '@mui/material';
                     }}>
                     <CardMedia
                       component="img"
-                      width="100%"
+                      style={{ width: '100%', aspectRatio: '1' }}
                       image= {product.avatar? product.avatar[0].url : "https://via.placeholder.com/150"}
                       alt="Product Image"
                     />

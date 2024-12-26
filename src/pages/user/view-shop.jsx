@@ -39,6 +39,8 @@ import { updateSourceFile } from "typescript";
 const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   <Box
     display="flex"
+    width ="100%"
+    m="2rem auto" 
     justifyContent="space-between"
     alignItems="center"
     mt={2}
@@ -87,90 +89,111 @@ const ProductsTable = ({ products ,setProducts, user, categories}) => {
       console.error(error);
     }
   };   
-   return(
-    <Box> 
-   <TableContainer component={Card}>
-    <Table>
-      <TableHead>
-        <TableRow sx={{ backgroundColor: "#1976d2" }}>
-          {[
-            "ID",
-            "Name",
-            "Category",
-            "Price",
-            "Stock level",
-            "Reorder quantity",
-            "Reorder level",
-            "Action",
-          ].map((head) => (
-            <TableCell
-              key={head}
-              sx={{ fontWeight: "bold", color: "white" }}
-              align="center"
-            >
-              {head}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {!products? null :products.map((product) => (
-          <TableRow key={product.id}  >
-            <TableCell align="center">{product.id}</TableCell>
-            <TableCell align="center">{product.name}</TableCell>
-            <TableCell align="center">{product.category_objects[0].name}</TableCell>
-            <TableCell align="center">{product.price}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">{product.inventory_object.stock_level}</TableCell>
-            <TableCell align="center">
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Button variant="text" color="primary" size="small"onClick={() => {
-                  setopenEdit(true);
-                  setId(product.id);
-                }}>
-                  Edit
-                </Button>
-                <Button variant="text" color="error" size="small" onClick={() => {
-            setopenDelete(true);
-            setId(product.id);
-          }}>
-                  Delete
-                </Button>
-              </Box>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table> 
-   </TableContainer>
-   <Dialog open={openDelete} onClose={() => setopenDelete(false)}
- fullWidth maxWidth="md">
-    <DialogTitle>Product Delete</DialogTitle>
-    <DialogContent></DialogContent>
-    <DialogActions>
-      <Button
-        onClick={() => {
-          setopenDelete(false); 
-        }}
-        color="secondary"
-      >
-        Cancel
-      </Button>
-      <Button 
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          DeleteProducts(); 
-        }} 
-      >
-        Confirm
-      </Button>
-    </DialogActions>
-  </Dialog>   
-  <AddEditProductDialog open={openEddit} categories={categories} setProducts={setProducts}
-        user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog> 
-  </Box>  
+   return( 
+   <><TableContainer component={Card} sx={{
+       width: "100%",
+     }}>
+       <Table sx={{ tableLayout: "fixed" }}>
+         <TableHead>
+           <TableRow sx={{ backgroundColor: "#1976d2" }}>
+             {[
+               "ID",
+               "Name",
+               "Category",
+               "Price",
+               "Stock level",
+               "Reorder quantity",
+               "Reorder level",
+               "Action",
+             ].map((head) => (
+               <TableCell
+                 key={head}
+                 align="center"
+                 sx={{
+                   fontWeight: "bold", color: "white",
+                   fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                   padding: { xs: "4px", sm: "6px" },
+                   maxWidth: "150px", // Limit max width for name column
+                   overflow: "hidden",
+                   textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+                   whiteSpace: "nowrap", // Prevents text from wrapping to next line
+                 }}
+               >
+                 {head}
+               </TableCell>
+             ))}
+           </TableRow>
+         </TableHead>
+         <TableBody>
+           {!products ? null : products.map((product, index) => (
+             <TableRow key={product.id}>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", overflow: "hidden",
+               }}>{index + 1}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", overflow: "hidden",
+               }}>{product.name}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+               }}>{product.category_objects[0].name}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis",    
+               }}>{product.price}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+               }}>{product.inventory_object.stock_level}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+               }}>{product.inventory_object.reorder_quantity}</TableCell>
+               <TableCell align="center" sx={{
+                 textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+               }}>{product.inventory_object.reorder_level}</TableCell>
+               <TableCell align="center">
+                 <Box display="flex" flexDirection="column" alignItems="center">
+                   <Button variant="text" color="primary" size="small" onClick={() => {
+                     setopenEdit(true);
+                     setId(product.id);
+                   } }>
+                     Edit
+                   </Button>
+                   <Button variant="text" color="error" size="small" onClick={() => {
+                     setopenDelete(true);
+                     setId(product.id);
+                   } }>
+                     Delete
+                   </Button>
+                 </Box>
+               </TableCell>
+             </TableRow>
+           ))}
+         </TableBody>
+       </Table>
+     </TableContainer><Dialog open={openDelete} onClose={() => setopenDelete(false)}
+       fullWidth maxWidth="md">
+         <DialogTitle>Product Delete</DialogTitle>
+         <DialogContent></DialogContent>
+         <DialogActions>
+           <Button
+             onClick={() => {
+               setopenDelete(false);
+             } }
+             color="secondary"
+           >
+             Cancel
+           </Button>
+           <Button
+             variant="contained"
+             color="primary"
+             onClick={() => {
+               DeleteProducts();
+             } }
+           >
+             Confirm
+           </Button>
+         </DialogActions>
+       </Dialog><AddEditProductDialog open={openEddit} categories={categories} setProducts={ setProducts }
+         user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog></> 
+ 
 );
 } 
 const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
@@ -263,13 +286,19 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
     media_ids: "",
     name: "",
     price: "",
-    reorder_level: 0,
-    reorder_quantity: 0,
-    stock_level: 0,
+    reorder_level: 1,
+    reorder_quantity: 1,
+    stock_level: 1,
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if(name === "price" || name === "reorder_level"|| name === "reorder_quantity"|| name === "stock_level") 
+      if (Number(value) <= 0) {
+        alert(`${name.replace("_", " ")} must be greater than 0.`);
+        return;
+      }
+   
     setFormData((prev) => ({
       ...prev,
       [name]: 
@@ -533,6 +562,31 @@ const ViewShopDialog = ({
       console.error(error);
     }
   };
+  const UpdateShop = async () => {
+    try {
+      const res = await fetch("http://tancatest.me/api/v1/shops", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "session-id": user.session_id,
+          Authorization: `Bearer ${user.token.AccessToken}`,
+          "x-client-id": user.id,
+        },
+        body: JSON.stringify({
+          name: userInput.name,
+          phone: userInput.phone,
+          city: userInput.city,
+          street: userInput.street,
+          district: userInput.district,
+        }), 
+      })
+        .then((res) => res.json())
+        .then((res) => res.data);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  }; 
   return (
     <Box>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
@@ -648,7 +702,7 @@ const ViewShopDialog = ({
                 Cancel
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={UpdateShop}
                 variant="contained"
                 color="primary"
               >
@@ -933,19 +987,19 @@ export default function ViewYourShop() {
         navigate={navigate}
       ></WaitApprovrMessege>
     );
-  return (
-    <Container
+  return ( 
+    <Box
       display="flex"
-      width={isNonMobileScreens ? "50%" : "100%"}
-      p="2rem"
-      m="2rem auto"
-      mt="100px"
+      flexDirection={"column"} 
+      flexShrink={0}
+      width={isNonMobileScreens ? "50%" : "100%"} 
+      m="2rem auto" 
     >
       <HeaderSection
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
       />
-      { products.length == 0 ? 
+      { products?.length === 0 ? 
        <DotLoader></DotLoader>:
        <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
       }
@@ -966,6 +1020,6 @@ export default function ViewYourShop() {
         handleOpen={() => setOpen2(true)}
         user={user}
       />
-    </Container>
+    </Box> 
   );
 }
