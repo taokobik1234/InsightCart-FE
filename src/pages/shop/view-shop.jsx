@@ -71,6 +71,24 @@ import {  Menu, MenuItem } from '@mui/material';
           console.error(error);
         }
       }; 
+      function findMostFrequentFirstCategory(products) {
+        const counts = products
+          .map(product => product.category_objects?.[0]?.name) 
+          .filter(name => name) 
+          .reduce((counts, name) => {
+            counts[name] = (counts[name] || 0) + 1; 
+            return counts;
+          }, {});  
+      
+        // Handle the case where no categories exist
+        if (Object.keys(counts).length === 0) {
+          return "";  
+        }
+      
+        // Find the most frequent category
+        return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
+      }
+      
       const fetchProduct = async () => { 
         try {
           const response = await fetch(
@@ -102,19 +120,22 @@ import {  Menu, MenuItem } from '@mui/material';
       }, [shopId ]);
       const allProductsRef = useRef(null);  
       const recomProductsRef = useRef(null);   
-
+      const [value, setValue] = useState(false);
+       
       const handleTabChange = (event, newValue) => {
+        setValue(newValue) 
         if (newValue === 0) { 
             recomProductsRef.current.scrollIntoView({ behavior: "smooth" });  
          }  
         if (newValue === 1) { 
            allProductsRef.current.scrollIntoView({ behavior: "smooth" });  
+           setproducts(productss); 
         }
         if (newValue === 2) { 
             allProductsRef.current.scrollIntoView({ behavior: "smooth" });  
             setproducts(productss);
             const filteredProducts = productss.filter((product) =>
-            product.category_objects.some((category) => category.name ===  "electronic")
+            product.category_objects.some((category) => category.name === findMostFrequentFirstCategory(products))
             );
             setproducts(filteredProducts); 
          }
@@ -191,10 +212,10 @@ import {  Menu, MenuItem } from '@mui/material';
       mt="100px"
     >
           {/* Navigation Tabs */}
-          <Tabs onChange={handleTabChange} centered>
+          <Tabs value={value} onChange={handleTabChange} centered>
             <Tab label="REcoment Product" />
             <Tab label="All Product" />
-            <Tab label="Electronic" />
+            <Tab label= {findMostFrequentFirstCategory(products)} />
             <Tab label="???" />
           </Tabs>
     
@@ -264,7 +285,7 @@ import {  Menu, MenuItem } from '@mui/material';
             <Typography variant="h5">All Product </Typography>
              <Box display="flex" flexDirection="row "  justifyContent="space-between" gap={2} mb={2}> 
             <Typography variant="h7" >Sort by:  </Typography> 
-            <Button    variant="text" color="primary" size="small"  onClick={()=> setproducts([...products].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))) } >
+            <Button    variant="text" color="primary" size="small" onClick={() => setproducts([...products].reverse())} >
  
                     Newest
              </Button>
@@ -306,7 +327,7 @@ import {  Menu, MenuItem } from '@mui/material';
                      All
                   </Button>
                 {categories.map((cate) => (
-                    <Button key={cate}  variant="text" color="primary" size="small" sx={{ textAlign: 'left', justifyContent: 'flex-start', width: '100%' }} onClick={() => {
+                    <Button key={cate.id}  variant="text" color="primary" size="small" sx={{ textAlign: 'left', justifyContent: 'flex-start', width: '100%' }} onClick={() => {
                         setproducts(productss);
                         const filteredProducts = productss.filter((product) =>
                           product.category_objects.some((category) => category.name === cate.name)
@@ -321,7 +342,7 @@ import {  Menu, MenuItem } from '@mui/material';
              </Box>
              <Grid container spacing={2}>
               {products.map((product) => (
-                <Grid item  xs={6} sm={4} md={3} key={product}>
+                <Grid item  xs={6} sm={4} md={3} key={product.id}>
                   <Card onClick={() => navigate(`/products/details/${product.id}`)} sx={{ 
                         '&:hover': {
                         cursor: 'pointer',

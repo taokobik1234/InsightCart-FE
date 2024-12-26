@@ -69,7 +69,7 @@ const ProductsTable = ({ products ,setProducts, user, categories}) => {
   const[id,setId] = useState(null) 
   const DeleteProducts = async () => {
     try {
-      const res = await fetch("http://tancatest.me/api/v1/shops/products/delete", {
+      const res = await fetch("http://tancatest.me/api/v1/shops/products", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -168,7 +168,7 @@ const ProductsTable = ({ products ,setProducts, user, categories}) => {
       </Button>
     </DialogActions>
   </Dialog>   
-  <AddEditProductDialog open={openEddit} categories={categories}
+  <AddEditProductDialog open={openEddit} categories={categories} setProducts={setProducts}
         user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog> 
   </Box>  
 );
@@ -205,9 +205,9 @@ const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
 
         const result = await response.json();
         console.log("Upload result:", result);
-
-        // Pass uploaded data and filenames to parent
-        onUpload(result.data);
+ 
+        const ids = result.data.map((item) => item.id);
+        onUpload(ids);
         const fileNames = files.map((file) => file.name);
         onFileNameChange(fileNames);
       } catch (error) {
@@ -256,7 +256,7 @@ const ImageUpload= ({ onUpload, onFileNameChange, user, url }) => {
     </Box>
   );
 };
-const AddEditProductDialog = ({ open, handleClose, categories, user ,title, product_id}) => {
+const AddEditProductDialog = ({ open, handleClose, categories, user ,title, product_id, setProducts,shop}) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
     category_ids: "",
@@ -272,26 +272,25 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "price"
-          ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-          : value,
+      [name]: 
+      name === "price"
+        ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
+        : value,
+
     }));
   };
 
-  const handleSubmit = () => {
-    const numericPrice = formData.price.replace(/\./g, "");
-    const dataToSubmit = { ...formData, price: parseInt(numericPrice, 10) };
-    console.log("Submitted Data:", dataToSubmit);
+  const handleSubmit = () => { 
     if(title == "Add Product" )createProduct();
     else updateProduct();
+      
   };
   const updateProduct = async () => {
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products/update `,
+        `http://tancatest.me/api/v1/shops/products`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             "session-id": user.session_id,
@@ -301,18 +300,18 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
           body: JSON.stringify({
             id: product_id, 
             name: formData.name,
-            price: formData.price,
-            reorder_level: formData.reorder_level,
-            reorder_quantity: formData.reorder_quantity,
-            stock_level: formData.stock_level,
+            price: parseInt(String(formData.price).replace(/\./g, ""), 10),
+            reorder_level: parseInt(formData.reorder_level, 10),
+            reorder_quantity: parseInt(formData.reorder_quantity, 10),
+            stock_level: parseInt(formData.stock_level, 10),
             media_ids: formData.media_ids,
-            category_ids: formData.category_ids,
+            category_ids: [formData.category_ids],
           }),
         }
       )
         .then((response) => response.json())
         .then((response) => response.data);
-
+      fetchProduct()   
       handleClose();
     } catch (error) {
       console.log(error);
@@ -322,7 +321,7 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
   const createProduct = async () => {
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/create-product `,
+        `http://tancatest.me/api/v1/shops/products`,
         {
           method: "POST",
           headers: {
@@ -333,23 +332,48 @@ const AddEditProductDialog = ({ open, handleClose, categories, user ,title, prod
           },
           body: JSON.stringify({
             name: formData.name,
-            price: formData.price,
-            reorder_level: formData.reorder_level,
-            reorder_quantity: formData.reorder_quantity,
-            stock_level: formData.stock_level,
+            price: parseInt(String(formData.price).replace(/\./g, ""), 10),
+            reorder_level: parseInt(formData.reorder_level, 10),
+            reorder_quantity: parseInt(formData.reorder_quantity, 10),
+            stock_level: parseInt(formData.stock_level, 10),
             media_ids: formData.media_ids,
-            category_ids: formData.category_ids,
+            category_ids: [formData.category_ids],
           }),
         }
       )
         .then((response) => response.json())
         .then((response) => response.data);
-
+      fetchProduct() 
       handleClose();
     } catch (error) {
       console.log(error);
     }
   };
+   
+  const fetchProduct = async () => {
+    if (!shop) return null; 
+    console.log (shop.id)
+    try {
+      const response = await fetch(
+        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
+        { 
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          }, 
+        }
+      )
+        .then((response) => response.json())
+        .then((response) => response.data);
+      console.log("Content-Type",response.products)   
+      setProducts(response.products)   
+    } catch (error) {
+      console.log(error);
+    }
+  }; 
+   
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle> {title}</DialogTitle>
@@ -881,7 +905,7 @@ export default function ViewYourShop() {
     console.log (shop.id)
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=671cb859fb04eff50015bf06 `,
+        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
         { 
           headers: {
             "Content-Type": "application/json",
@@ -921,13 +945,19 @@ export default function ViewYourShop() {
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
       />
-      <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
+      { products.length == 0 ? 
+       <DotLoader></DotLoader>:
+       <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
+      }
+      
       <AddEditProductDialog
         open={open}
         title = "Add Product" 
         handleClose={() => setOpen(false)}
         categories={categories}
-        user={user}
+        user={user} 
+        setProducts={setproducts}
+        shop ={shop}  
       />
       <ViewShopDialog
         shop={shop}
