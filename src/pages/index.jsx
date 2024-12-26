@@ -54,6 +54,31 @@ function HomeScreen() {
 
         fetchAllProducts();
     }, []);
+
+    const initialTime = 7 * 60 * 60;
+
+    const [timeInSeconds, setTimeInSeconds] = useState(initialTime);
+
+    useEffect(() => {
+        const timer = timeInSeconds > 0 && setInterval(() => {
+            setTimeInSeconds(timeInSeconds - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeInSeconds]);
+
+    const formatTime = () => {
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        const paddedHours = String(hours).padStart(2, '0');
+        const paddedMinutes = String(minutes).padStart(2, '0');
+        const paddedSeconds = String(seconds).padStart(2, '0');
+
+        return [paddedHours, paddedMinutes, paddedSeconds];
+    }
+
+    const [hours, minutes, seconds] = formatTime();
     return (
         <div className="bg-gray-100">
             <div className="flex m-auto pt-2">
@@ -140,7 +165,7 @@ function HomeScreen() {
 
                         {/* Offer Timer */}
                         <div className="flex space-x-4 mb-6">
-                            {["07", "07", "07", "07"].map((time, index) => (
+                            {[hours, minutes, seconds].map((time, index) => (
                                 <div
                                     key={index}
                                     className="bg-white text-gray-900 text-xl font-bold p-3 rounded"

@@ -26,7 +26,7 @@ export default function CarouselComponent() {
         }, 4000);
 
         return () => clearInterval(autoSlide);
-    }, []);
+    }, [nextSlide]);
 
 
     return (

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import DotLoader from "../../components/ui/DotLoader";
-
+import { useNavigate } from "react-router-dom";
 export default function ProductList() {
+    const navigate = useNavigate();
     const { categoryId } = useParams();
     const [searchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
@@ -63,42 +64,50 @@ export default function ProductList() {
                     <div className="grid grid-cols-6 gap-6">
                         {products.map((product) => (
                             <div
+                                onClick={() => navigate(`/products/details/${product.id}`)}
                                 key={product.id}
-                                className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition relative bg-gray-50"
+                                className="border rounded-lg overflow-hidden shadow hover:shadow-xl transition bg-white relative mx-2 cursor-pointer"
                             >
-                                {/* Badge and Discount */}
-                                <div className="absolute top-3 left-3">
-                                    {product.isNew && (
-                                        <span className="bg-white text-black text-xs font-bold px-2 py-1 rounded shadow">
-                                            NEW
-                                        </span>
-                                    )}
-                                    {product.discount && (
-                                        <span className="block mt-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow">
-                                            -{product.discount}%
-                                        </span>
-                                    )}
-                                </div>
+                                {/* Badge (Top or Sale) */}
+                                {product.badge && (
+                                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                        {product.badge}
+                                    </span>
+                                )}
+                                {product.discount && (
+                                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                        -{product.discount}%
+                                    </span>
+                                )}
 
                                 {/* Product Image */}
                                 <img
-                                    src={
-                                        product.images?.length > 0
-                                            ? product.images[0].url
-                                            : "https://via.placeholder.com/150"
-                                    }
+                                    src={product.images?.[0]?.url || "https://via.placeholder.com/150"}
                                     alt={product.name}
-                                    className="w-full h-50 object-cover p-1"
+                                    className="w-full h-48 object-contain"
                                 />
 
                                 {/* Product Info */}
-                                <div className="p-4 text-center">
-                                    <p className="font-semibold mb-1 text-gray-800">{product.name}</p>
-                                    <p className="text-gray-600 font-medium mb-1">${product.price}</p>
-                                    {/* Add to Cart Button */}
-                                    <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                        Add to Cart
-                                    </button>
+                                <div className="text-center p-3">
+                                    <p className="text-red-500 font-bold text-lg mb-1">
+                                        $ {product.price || "N/A"}
+                                    </p>
+                                    <p className="text-gray-800 text-sm font-medium mb-2 truncate">
+                                        {product.name}
+                                    </p>
+                                    {/* Star Rating */}
+                                    <div className="flex justify-center mb-2">
+                                        {[...Array(5)].map((_, i) => (
+                                            <svg
+                                                key={i}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-4 w-4 text-yellow-500 fill-current"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 17.3l6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.76-1.64 7.03z" />
+                                            </svg>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         ))}
