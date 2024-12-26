@@ -116,7 +116,7 @@ function HomeScreen() {
                 </div>
             </div>
             {/* List Product */}
-            <div className="max-w-7xl mx-auto p-6 space-x-8 bg-white mt-10">
+            <div className="max-w-7xl mx-auto p-6 space-x-8 bg-white mt-10 mb-10">
                 <div className="flex justify-between items-center border-b border-gray-300 pb-2 px-10">
                     {/* Left Title */}
                     <h2 className="text-2xl font-bold">New Arrivals</h2>
@@ -134,7 +134,7 @@ function HomeScreen() {
             </div>
 
             {/* Discount board */}
-            <div className="flex items-center justify-center bg-black text-white p-4">
+            <div className="flex max-w-7xl mx-auto space-x-8 bg-white mt-10 mb-10">
                 {/* Container */}
                 <div className="flex max-w-screen-xl w-full h-1/2 bg-black rounded-lg overflow-hidden shadow-lg">
                     {/* Left Side - Image */}
@@ -145,8 +145,8 @@ function HomeScreen() {
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute bottom-8 left-8">
-                            <h1 className="text-4xl font-bold mb-2">PlayStation 5</h1>
-                            <p className="text-lg">
+                            <h1 className="text-4xl font-bold mb-2 text-white">PlayStation 5</h1>
+                            <p className="text-lg text-white">
                                 Black and White version of the PS5 <br />
                                 coming out on sale.
                             </p>
@@ -158,7 +158,7 @@ function HomeScreen() {
                         <h2 className="text-sm font-semibold text-blue-400 mb-2">
                             LIMITED EDITION
                         </h2>
-                        <h3 className="text-4xl font-bold mb-4">Hurry up! 50% OFF</h3>
+                        <h3 className="text-4xl font-bold mb-4 text-white">Hurry up! 50% OFF</h3>
                         <p className="text-gray-300 mb-6">
                             Find clubs that are right for your game
                         </p>

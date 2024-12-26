@@ -21,7 +21,7 @@ export default function ListProductCard({ products }) {
     const ArrowFixLeft = ({ onClick }) => (
         <button
             onClick={onClick}
-            className="absolute left-0 bg-white rounded-full hover:bg-gray-800"
+            className="absolute left-0 bg-white rounded-full hover:scale-150 shadow"
         >
             <IoIosArrowBack size={40} color="black" />
         </button>
@@ -30,7 +30,7 @@ export default function ListProductCard({ products }) {
     const ArrowFixRight = ({ onClick }) => (
         <button
             onClick={onClick}
-            className="absolute right-0 bg-white rounded-full hover:bg-gray-800"
+            className="absolute right-0 bg-white rounded-full hover:scale-150 shadow"
         >
             <IoIosArrowForward size={40} color="black" />
         </button>
@@ -58,11 +58,11 @@ export default function ListProductCard({ products }) {
                         className="border rounded-lg overflow-hidden shadow hover:shadow-xl transition bg-white relative mx-2 cursor-pointer"
                     >
                         {/* Badge (Top or Sale) */}
-                        {product.badge && (
-                            <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                {product.badge}
-                            </span>
-                        )}
+
+                        <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+                            New
+                        </span>
+
                         {product.discount && (
                             <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                                 -{product.discount}%

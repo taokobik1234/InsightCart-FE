@@ -1,4 +1,4 @@
-import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material";
+import { Box, Typography, useMediaQuery, TextField, Button, Alert } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +37,7 @@ export default function SignUp() {
       if (response.message !== "Success") {
         console.log(response);
         setErrorText(response.message);
+        setTimeout(() => setErrorText(""), 3000);
       } else {
         onSubmitProps.resetForm();
         navigate(`/auth/verify-request/${values.email}?type=verify-request`);
@@ -55,6 +56,21 @@ export default function SignUp() {
         borderRadius="1.5rem"
         backgroundColor={"#F0F0F0"}
       >
+        {errorText && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: "100px",
+              right: "20px",
+              zIndex: 1000,
+              minWidth: "250px",
+            }}
+          >
+            <Alert severity="error" variant="filled">
+              {errorText}
+            </Alert>
+          </Box>
+        )}
         <Typography align="center" fontWeight="500" variant="h5" sx={{ mb: "20px" }}>
           Sign Up
         </Typography>
@@ -116,9 +132,6 @@ export default function SignUp() {
                     helperText={touched.password && errors.password}
                     sx={{ gridColumn: "span 4" }}
                   />
-                  {errorText && <Box sx={{ gridColumn: "span 4" }}>
-                    <Typography color="red" >{errorText}</Typography>
-                  </Box>}
                 </Box>
                 <Box>
                   <Button

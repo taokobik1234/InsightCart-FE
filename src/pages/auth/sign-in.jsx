@@ -1,4 +1,4 @@
-import { Box, Typography, useMediaQuery, TextField, Button } from "@mui/material";
+import { Box, Typography, useMediaQuery, TextField, Button, Alert } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +35,7 @@ const LoginScreen = () => {
       }).then(response => {
         if (!response.ok) {
           setErrorText(response.statusText);
+          setTimeout(() => setErrorText(""), 3000);
           throw new Error(response.statusText);
         }
         return response.json();
@@ -56,6 +57,21 @@ const LoginScreen = () => {
         borderRadius="1.5rem"
         backgroundColor={"#F0F0F0"}
       >
+        {errorText && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: "100px",
+              right: "20px",
+              zIndex: 1000,
+              minWidth: "250px",
+            }}
+          >
+            <Alert severity="error" variant="filled">
+              {errorText}
+            </Alert>
+          </Box>
+        )}
         <Typography fontWeight="500" variant="h5" sx={{ mb: "20px" }}>
           Welcome to InsightCart, the Shopping Media for every one!
         </Typography>
@@ -107,9 +123,6 @@ const LoginScreen = () => {
                     helperText={touched.password && errors.password}
                     sx={{ gridColumn: "span 4" }}
                   />
-                  {errorText && <Box sx={{ gridColumn: "span 4" }}>
-                    <Typography color="red" >{errorText}</Typography>
-                  </Box>}
                 </Box>
                 <Box>
                   <Button

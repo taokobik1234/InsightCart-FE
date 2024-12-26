@@ -21,12 +21,9 @@ export default function CarouselComponent() {
         else setCurrent(current + 1);
     };
     useEffect(() => {
-        const autoSlide = setInterval(() => {
-            nextSlide();
-        }, 4000);
-
+        const autoSlide = setInterval(nextSlide, 4000);
         return () => clearInterval(autoSlide);
-    }, [nextSlide]);
+    }, [current]);
 
 
     return (

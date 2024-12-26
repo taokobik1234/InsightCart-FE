@@ -1,10 +1,10 @@
 
 import React from 'react'
-import { Box, Typography, useMediaQuery, TextField, Button, IconButton, InputAdornment } from "@mui/material";
+import { Box, Typography, useMediaQuery, TextField, Button, IconButton, InputAdornment, Alert } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 const SignUpSchema = yup.object().shape({
     password: yup.string().required("required"),
@@ -14,9 +14,10 @@ const initialValuesSignUp = {
     email: "",
 };
 export default function ResetPassword() {
+    const navigate = useNavigate();
     const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
     const isNonMobile = useMediaQuery("(min-width:600px)");
-    const [errorText, setErrorText] = useState("");
+    const [errorText, setErrorText] = useState({ type: "", message: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const location = useLocation();
@@ -30,7 +31,8 @@ export default function ResetPassword() {
     }
     const resetPassword = async (values, onSubmitProps) => {
         if (values.password !== values.confirmPassword) {
-            setErrorText("Passwords do not match");
+            setErrorText({ type: "error", message: "Passwords do not match" });
+            setTimeout(() => setErrorText(""), 3000);
             return;
         }
         try {
@@ -45,9 +47,14 @@ export default function ResetPassword() {
             });
             const data = await response.json();
             if (data.message !== 'Success') {
-                setErrorText(data.message || 'Failed to verify');
+                setErrorText({ type: "error", message: data.message || 'Failed to verify' });
+                setTimeout(() => setErrorText(""), 3000);
             } else {
-                setErrorText("Reset Successful");
+                setErrorText({ type: "success", message: "Reset Successful" });
+                setTimeout(() => {
+                    setErrorText("");
+                    navigate("/auth/sign-in")
+                }, 3000);
             }
         } catch (error) {
             setErrorText(error.message);
@@ -62,6 +69,21 @@ export default function ResetPassword() {
                 borderRadius="1.5rem"
                 backgroundColor={"#F0F0F0"}
             >
+                {errorText && (
+                    <Box
+                        sx={{
+                            position: "fixed",
+                            top: "100px",
+                            right: "20px",
+                            zIndex: 1000,
+                            minWidth: "250px",
+                        }}
+                    >
+                        <Alert severity={errorText.type} variant="filled">
+                            {errorText.message}
+                        </Alert>
+                    </Box>
+                )}
                 <Typography fontWeight="800" variant="h5" sx={{ mb: "20px" }}>
                     Reset Password
                 </Typography>
@@ -143,9 +165,6 @@ export default function ResetPassword() {
                                             )
                                         }}
                                     />
-                                    {errorText && <Box sx={{ gridColumn: "span 4" }}>
-                                        <Typography color="red" >{errorText}</Typography>
-                                    </Box>}
                                 </Box>
                                 <Box>
                                     <Button

@@ -1,9 +1,33 @@
 import React from 'react'
 import { FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { Alert, Box } from '@mui/material';
 export default function Contact() {
+    const [showAlert, setShowAlert] = React.useState(false);
+    const handleSend = (e) => {
+        e.preventDefault();
+        setShowAlert(true);
+        setTimeout(() => {
+            setShowAlert(false);
+        }, 3000);
+    }
     return (
         <div className="flex flex-wrap w-full p-20">
             {/* <!-- Left Section: Contact Information --> */}
+            {showAlert && (
+                <Box
+                    sx={{
+                        position: "fixed",
+                        top: "100px",
+                        right: "20px",
+                        zIndex: 1000,
+                        minWidth: "250px",
+                    }}
+                >
+                    <Alert severity="success" variant="filled">
+                        Send message successfully
+                    </Alert>
+                </Box>
+            )}
             <div className="w-full md:w-1/3 bg-black text-white p-8">
                 <h2 className="text-2xl font-bold mb-4">Contact Information</h2>
                 <p className="mb-8 text-gray-400">Say something to start a live chat!</p>
@@ -83,6 +107,7 @@ export default function Contact() {
                     <div className="flex justify-end mt-8">
                         <button
                             type="submit"
+                            onClick={handleSend}
                             className="bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-800"
                         >
                             Send Message
