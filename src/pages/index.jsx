@@ -8,7 +8,12 @@ import DotLoader from "../components/ui/DotLoader";
 function HomeScreen() {
     const [categories, setCategories] = useState([]);
     const [allProducts, setAllProducts] = useState([]);
+    const [recommendedProducts, setRecommendedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const ITEMS_PER_PAGE = 8; // Define items per page
     const location = useLocation();
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -54,6 +59,51 @@ function HomeScreen() {
 
         fetchAllProducts();
     }, []);
+
+    useEffect(() => {
+        const fetchRecommendedProducts = async (page = 1) => {
+            try {
+                if (page === 1) {
+                    setLoading(true);
+                } else {
+                    setLoadingMore(true);
+                }
+                
+                const response = await fetch(
+                    `http://tancatest.me/api/v1/shops/products/all?page=${page}&limit=${ITEMS_PER_PAGE}`,
+                    {
+                        method: "GET",
+                    }
+                );
+                const data = await response.json();
+                
+                const newItems = data.data.items || [];
+                
+                if (page === 1) {
+                    setRecommendedProducts(newItems);
+                } else {
+                    setRecommendedProducts(prevProducts => [...prevProducts, ...newItems]); // Append new items to existing ones
+                }
+                
+                // Check if we have more pages based on total count from API
+                setHasMore(data.data.meta.total > page * ITEMS_PER_PAGE);
+            } catch (error) {
+                console.error("Error fetching recommended products:", error);
+                setHasMore(false);
+            } finally {
+                setLoading(false);
+                setLoadingMore(false);
+            }
+        };
+
+        fetchRecommendedProducts(currentPage);
+    }, [currentPage]);
+
+    const handleLoadMore = () => {
+        if (!loadingMore && hasMore) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
 
     const initialTime = 7 * 60 * 60;
 
@@ -183,18 +233,74 @@ function HomeScreen() {
                 </div>
             </div>
 
-            {/* List Product */}
-            <div className="max-w-7xl mx-auto p-6 space-x-8 bg-white mt-10 mb-10">
-                <div className="flex justify-between items-center border-b border-gray-300 pb-2 px-10">
-                    {/* Left Title */}
-                    <h2 className="text-2xl font-bold">Best Selling</h2>
-
-                    {/* Right Button */}
-                    <NavLink to={"/products/all"} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                        View All
-                    </NavLink>
+            {/* Recommended Today Section */}
+            <div className="max-w-7xl mx-auto p-6 bg-white mt-10 mb-10">
+                <div className="flex justify-between items-center border-b border-gray-300 pb-2 px-10 mb-6">
+                    <h2 className="text-2xl font-bold">Recommended Today</h2>
+                    <div className="flex items-center">
+                        <span className="text-gray-500 mr-2">Updated daily</span>
+                    </div>
                 </div>
-                <ListProductCard products={allProducts} />
+                {loading ? (
+                    <DotLoader />
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+                            {recommendedProducts.map((product) => (
+                                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                    <NavLink to={`/products/detail/${product.id}`}>
+                                        <div className="relative h-48">
+                                            <img
+                                                src={product.images[0]?.url || 'placeholder-image-url'}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            {product.discount > 0 && (
+                                                <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm">
+                                                    -{product.discount}%
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                                {product.name}
+                                            </h3>
+                                            <div className="mt-2 flex justify-between items-center">
+                                                <div>
+                                                    {product.discount > 0 ? (
+                                                        <>
+                                                            <span className="text-red-500 font-bold">${product.price * (1 - product.discount / 100)}</span>
+                                                            <span className="ml-2 text-gray-400 line-through text-sm">${product.price}</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-gray-700 font-bold">${product.price}</span>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    Sold: {product.sold}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </NavLink>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-center mt-8">
+                            {loadingMore ? (
+                                <DotLoader />
+                            ) : (
+                                hasMore && (
+                                    <button
+                                        onClick={handleLoadMore}
+                                        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                                    >
+                                        View More
+                                    </button>
+                                )
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
 
             <ServiceCard />
