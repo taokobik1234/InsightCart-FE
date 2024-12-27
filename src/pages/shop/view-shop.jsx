@@ -4,6 +4,8 @@ import {
     useMediaQuery, 
     Button,
   } from "@mui/material"; 
+  import Tooltip from '@mui/material/Tooltip';
+   
 import { AppBar,   Tabs, Tab, Grid, Card, CardMedia, CardContent,Container } from '@mui/material';
 import {  Menu, MenuItem } from '@mui/material';
 
@@ -151,7 +153,7 @@ import {  Menu, MenuItem } from '@mui/material';
         };
         const formattedDate = date.toLocaleString('en-US', options);
         return formattedDate;
-    } 
+      } 
     if (!shop) return DotLoader(); 
     return (
         <div>
@@ -213,7 +215,7 @@ import {  Menu, MenuItem } from '@mui/material';
     >
           {/* Navigation Tabs */}
           <Tabs value={value} onChange={handleTabChange} centered>
-            <Tab label="REcoment Product" />
+            <Tab label="recomment Product" />
             <Tab label="All Product" />
             <Tab label= {findMostFrequentFirstCategory(products)} />
             <Tab label="???" />
@@ -256,7 +258,7 @@ import {  Menu, MenuItem } from '@mui/material';
             <Typography variant="h6">Your Recomment</Typography>
             <Grid container spacing={2}>
               {[1, 2, 3, 4,5,6  ].map((product) => (
-                <Grid item xs={7} sm={7} md={2} key={product}>
+                <Grid item xs={2} sm={2} md={2} key={product}>
                   <Card>
                     <CardMedia
                       component="img"
@@ -270,7 +272,7 @@ import {  Menu, MenuItem } from '@mui/material';
                         Price: 99,000₫
                       </Typography>
                       <Button variant="contained" size="small" color="primary">
-                        Mua Ngay
+                        Buy Now
                       </Button>
                     </CardContent>
                   </Card>
@@ -356,7 +358,11 @@ import {  Menu, MenuItem } from '@mui/material';
                       alt="Product Image"
                     />
                     <CardContent>
-                      <Typography variant="subtitle1">{product.name} </Typography>
+                    <Tooltip title={product.name || "Unnamed Product"} arrow>
+                      <Typography variant="subtitle1" noWrap>
+                        {product.name || "Unnamed Product"}
+                      </Typography>
+                    </Tooltip>
                       <Typography variant="subtitle2" color="text.secondary">
                         Price: {product.price}₫
                       </Typography>

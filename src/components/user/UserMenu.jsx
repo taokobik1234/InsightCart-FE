@@ -110,7 +110,7 @@ export default function UserMenu() {
             handleClose()
           }}
         >
-          {shop ? "View shop" :"Create shop"}
+          {shop ? "Seller panel" :"Create shop"}
         </MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>

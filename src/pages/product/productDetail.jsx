@@ -17,6 +17,21 @@ export default function ProductDetailPage() {
     const [activeTab, setActiveTab] = useState("description");
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [message, setMessage] = useState({ type: "", message: "" });
+    const [shop, setShop] = useState();
+    
+    const convertDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const options = {
+        
+            year: 'numeric', 
+            month: 'long',    
+            day: 'numeric', 
+          
+        };
+        const formattedDate = date.toLocaleString('en-US', options);
+        return formattedDate;
+    } 
+        
     useEffect(() => {
         const fetchProductDetail = async () => {
             try {
@@ -64,7 +79,30 @@ export default function ProductDetailPage() {
                 console.error("Error fetching products:", error);
             }
         };
-
+         
+        const fetchShop = async () => {
+            try { 
+                const response = await fetch(
+                    `http://tancatest.me/api/v1/shops/${productDetail.shop_id}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "session-id": user.session_id,
+                            Authorization: `Bearer ${user.token.AccessToken}`,
+                            "x-client-id": user.id,
+                          }, 
+                    }
+                     
+                );
+                 
+                const data = await response.json();
+                setShop(data.data) 
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
+        fetchShop(); 
         fetchRelatedProducts();
     }, [productDetail]);
     const handleQuantityChange = (type) => {
@@ -252,7 +290,7 @@ export default function ProductDetailPage() {
                     {/* Shop Logo */}
                     <div className="w-16 h-16 rounded-full overflow-hidden">
                         <img
-                            src={productDetail.shop_logo || "https://via.placeholder.com/64"}
+                            src={shop?.avatar_obj?.url || "https://via.placeholder.com/64"}
                             alt="Shop Logo"
                             className="w-full h-full object-cover"
                         />
@@ -262,8 +300,8 @@ export default function ProductDetailPage() {
                     <div className="flex-[0.25] flex space-x-4">
                         {/* Shop Details */}
                         <div className="mb-4">
-                            <h2 className="text-lg font-bold">{productDetail.shop_name || "Shop Name"}</h2>
-                            <p className="text-gray-500">Online {productDetail.last_active || "N/A"} ago</p>
+                            <h2 className="text-lg font-bold">{shop?.name || "Shop Name"}</h2>
+                            <p className="text-gray-500">Online {shop?.last_active || "N/A"} ago</p>
                         </div>
 
 
@@ -276,17 +314,17 @@ export default function ProductDetailPage() {
                                 <p className="font-bold">{productDetail.shop_reviews || "N/A"}</p>
                             </div>
                             <div>
-                                <span className="text-gray-500">Products Count</span>
-                                <p className="font-bold">{productDetail.shop_products || "N/A"}</p>
+                                <span className="text-gray-500">Phone</span>
+                                <p className="font-bold">{shop?.phone || "N/A"}</p>
                             </div>
 
                             <div>
                                 <span className="text-gray-500">Join date </span>
-                                <p className="font-bold">{productDetail.joined_date || "N/A"}</p>
+                                <p className="font-bold">{convertDate(shop?.created_at) || "N/A"}</p>
                             </div>
                             <div>
-                                <span className="text-gray-500">Followers</span>
-                                <p className="font-bold">{productDetail.followers || "N/A"}</p>
+                                <span className="text-gray-500">Address</span>
+                                <p className="font-bold">{shop?.address.city + ", " + shop?.address.district + ", " + shop?.address.street || "N/A"}</p>
                             </div>
                         </div>
                     </div>

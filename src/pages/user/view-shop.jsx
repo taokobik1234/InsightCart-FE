@@ -21,6 +21,8 @@ import {
   InputAdornment,
   Grid,
 } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -65,10 +67,18 @@ const HeaderSection = ({ handleClickOpen, handleClickOpen2 }) => (
   </Box>
 );
 
-const ProductsTable = ({ products, setProducts, user, categories }) => {
-  const [openEddit, setopenEdit] = useState(false)
-  const [openDelete, setopenDelete] = useState(false)
-  const [id, setId] = useState(null)
+ 
+const ProductsTable = ({
+  products,
+  setProducts,
+  user,
+  categories,
+  setEdit,
+  setEditProductId,
+  setEditProduct,
+}) => {
+  const [openDelete, setopenDelete] = useState(false);
+  const [id, setId] = useState(null); 
   const DeleteProducts = async () => {
     try {
       const res = await fetch("http://tancatest.me/api/v1/shops/products", {
@@ -79,97 +89,193 @@ const ProductsTable = ({ products, setProducts, user, categories }) => {
           Authorization: `Bearer ${user.token.AccessToken}`,
           "x-client-id": user.id,
         },
-        body: JSON.stringify({ "ids": [id] }),
+ 
+        body: JSON.stringify({ ids: [id] }),
       })
         .then((res) => res.json())
         .then((res) => res.data);
-      setProducts((prevProducts) => prevProducts.filter(product => product.id !== id));
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== id)
+      );
+ 
       setopenDelete(false);
     } catch (error) {
       console.error(error);
     }
   };
-  return (
-    <><TableContainer component={Card} sx={{
-      width: "100%",
-    }}>
-      <Table sx={{ tableLayout: "fixed" }}>
-        <TableHead>
-          <TableRow sx={{ backgroundColor: "#1976d2" }}>
-            {[
-              "ID",
-              "Name",
-              "Category",
-              "Price",
-              "Stock level",
-              "Reorder quantity",
-              "Reorder level",
-              "Action",
-            ].map((head) => (
-              <TableCell
-                key={head}
-                align="center"
-                sx={{
-                  fontWeight: "bold", color: "white",
-                  fontSize: { xs: "0.7rem", sm: "0.9rem" },
-                  padding: { xs: "4px", sm: "6px" },
-                  maxWidth: "150px", // Limit max width for name column
-                  overflow: "hidden",
-                  textOverflow: "ellipsis", // Adds an ellipsis if text overflows
-                  whiteSpace: "nowrap", // Prevents text from wrapping to next line
-                }}
-              >
-                {head}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {!products ? null : products.map((product, index) => (
-            <TableRow key={product.id}>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", overflow: "hidden",
-              }}>{index + 1}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", overflow: "hidden",
-              }}>{product.name}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", // Adds an ellipsis if text overflows
-              }}>{product.category_objects[0].name}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis",
-              }}>{product.price}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", // Adds an ellipsis if text overflows
-              }}>{product.inventory_object.stock_level}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", // Adds an ellipsis if text overflows
-              }}>{product.inventory_object.reorder_quantity}</TableCell>
-              <TableCell align="center" sx={{
-                textOverflow: "ellipsis", // Adds an ellipsis if text overflows
-              }}>{product.inventory_object.reorder_level}</TableCell>
-              <TableCell align="center">
-                <Box display="flex" flexDirection="column" alignItems="center">
-                  <Button variant="text" color="primary" size="small" onClick={() => {
-                    setopenEdit(true);
-                    setId(product.id);
-                  }}>
-                    Edit
-                  </Button>
-                  <Button variant="text" color="error" size="small" onClick={() => {
-                    setopenDelete(true);
-                    setId(product.id);
-                  }}>
-                    Delete
-                  </Button>
-                </Box>
-              </TableCell>
+  return ( 
+    <>
+      <TableContainer
+        component={Card}
+        sx={{
+          width: "100%",
+        }}
+      >
+        <Table sx={{ tableLayout: "fixed" }}>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#1976d2" }}>
+              {[
+                "ID",
+                "Name",
+                "Category",
+                "Price",
+                "Stock level",
+                "Reorder quantity",
+                "Reorder level",
+                "Action",
+              ].map((head) => (
+                <Tooltip title={head} key={head} arrow>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: "bold",
+                      color: "white",
+                      fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                      padding: { xs: "4px", sm: "6px" },
+                      maxWidth: "150px", // Limit max width for name column
+                      overflow: "hidden",
+                      textOverflow: "ellipsis", // Adds an ellipsis if text overflows
+                      whiteSpace: "nowrap", // Prevents text from wrapping to next line
+                    }}
+                  >
+                    {head}
+                  </TableCell>
+                </Tooltip>
+              ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer><Dialog open={openDelete} onClose={() => setopenDelete(false)}
-      fullWidth maxWidth="md">
+          </TableHead>
+          <TableBody>
+            {!products
+              ? null
+              : products.map((product, index) => (
+                  <TableRow key={product.id}>
+                    <Tooltip title={index + 1} arrow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {index + 1}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip title={product.name} arrow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.name}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip title={product.category_objects[0].name} arrow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.category_objects[0].name}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip title={product.price} arrow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.price}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip title={product.inventory_object.stock_level} arrow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.inventory_object.stock_level}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip
+                      title={product.inventory_object.reorder_quantity}
+                      arrow
+                    >
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.inventory_object.reorder_quantity}
+                      </TableCell>
+                    </Tooltip>
+                    <Tooltip
+                      title={product.inventory_object.reorder_level}
+                      arrow
+                    >
+                      <TableCell
+                        align="center"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {product.inventory_object.reorder_level}
+                      </TableCell>
+                    </Tooltip>
+
+                    <TableCell align="center">
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                      >
+                        <Button
+                          variant="text"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setEdit(true);
+                            setEditProductId(product.id);
+                            setEditProduct(product);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="text"
+                          color="error"
+                          size="small"
+                          onClick={() => {
+                            setopenDelete(true);
+                            setId(product.id);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Dialog
+        open={openDelete}
+        onClose={() => setopenDelete(false)}
+        fullWidth
+        maxWidth="md"
+      >
+ 
         <DialogTitle>Product Delete</DialogTitle>
         <DialogContent></DialogContent>
         <DialogActions>
@@ -190,14 +296,13 @@ const ProductsTable = ({ products, setProducts, user, categories }) => {
           >
             Confirm
           </Button>
-        </DialogActions>
-      </Dialog><AddEditProductDialog open={openEddit} categories={categories} setProducts={setProducts}
-        user={user} handleClose={() => setopenEdit(false)} title={"Edit Product"} product_id={id}></AddEditProductDialog></>
-
+        </DialogActions> 
+      </Dialog> 
+    </>
   );
-}
+};
 const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
-  const [previewUrls, setPreviewUrls] = useState(url ? [url] : []);
+  const [previewUrls, setPreviewUrls] = useState(url ? url : []); 
   const [error, setError] = useState(null);
 
   const handleFileChange = async (e) => {
@@ -205,7 +310,7 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
     if (files.length > 0) {
       // Update previews
       const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+      setPreviewUrls(newPreviewUrls);
       setError(null);
 
       const formData = new FormData();
@@ -241,7 +346,13 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={2} alignItems="center" width="100%">
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+      alignItems="center"
+      width="100%"
+    >
       <Button variant="outlined" component="label">
         Upload Images
         <input
@@ -259,7 +370,13 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
         </Alert>
       )}
 
-      <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mt={2}>
+      <Box
+        display="flex"
+        flexWrap="wrap"
+        gap={2}
+        justifyContent="center"
+        mt={2}
+      >
         {previewUrls.map((url, index) => (
           <Box
             key={index}
@@ -279,7 +396,103 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
     </Box>
   );
 };
-const AddEditProductDialog = ({ open, handleClose, categories, user, title, product_id, setProducts, shop }) => {
+const SingleImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
+  const [previewUrl, setPreviewUrl] = useState(url || null);
+  const [error, setError] = useState(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Update preview
+      const newPreviewUrl = URL.createObjectURL(file);
+      setPreviewUrl(newPreviewUrl);
+      setError(null);
+
+      const formData = new FormData();
+      formData.append("files", file);
+
+      try {
+        const response = await fetch("http://tancatest.me/api/v1/media", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+            "session-id": user.session_id,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload the image. Please try again.");
+        }
+
+        const result = await response.json();
+        console.log("Upload result:", result);
+
+        const id = result.data[0].id;
+        onUpload(id);
+        onFileNameChange(file.name);
+      } catch (error) {
+        console.error("Upload error:", error);
+        setError(error.message);
+      }
+    }
+  };
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+      alignItems="center"
+      width="100%"
+    >
+      <Button variant="outlined" component="label">
+        Upload Image
+        <input
+          type="file"
+          hidden
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </Button>
+
+      {error && (
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
+      )}
+
+      {previewUrl && (
+        <Box
+          component="img"
+          src={previewUrl}
+          alt="Preview"
+          sx={{
+            width: 100,
+            height: 100,
+            objectFit: "cover",
+            borderRadius: 1,
+            border: "1px solid #ddd",
+            mt: 2,
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
+const AddEditProductDialog = ({
+  open,
+  handleClose,
+  categories,
+  user,
+  title,
+  product_id,
+  setProducts,
+  shop,
+  product,
+}) => { 
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
     category_ids: "",
@@ -290,29 +503,75 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
     reorder_quantity: 1,
     stock_level: 1,
   });
+  const [message, setMessage] = useState({ type: "", message: "" });
 
+  useEffect(() => {
+    if (product) {
+      setSelectedFileName("");
+      setFormData({
+        category_ids: product?.category_objects?.[0]?.id || "",
+        media_ids: product?.avatar?.map((item) => item.media_id) || "",
+        name: product?.name || "",
+        price: product?.price || "",
+        reorder_level: 1,
+        reorder_quantity: 1,
+        stock_level: product?.inventory_object?.stock_level || 1,
+      });
+    }
+  }, [product]);
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "price" || name === "reorder_level" || name === "reorder_quantity" || name === "stock_level")
-      if (Number(value) <= 0) {
-        alert(`${name.replace("_", " ")} must be greater than 0.`);
-        return;
-      }
-
+    const { name, value } = e.target;  
     setFormData((prev) => ({
       ...prev,
       [name]:
         name === "price"
           ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-          : value,
-
+          : value, 
     }));
   };
 
-  const handleSubmit = () => {
-    if (title == "Add Product") createProduct();
-    else updateProduct();
+  const handleSubmit = () => { 
+    const requiredFields = [
+      "media_ids",
+      "category_ids",
+      "name",
+      "price",
+      "reorder_level",
+      "reorder_quantity",
+      "stock_level",
+    ];
+    const missingFields = requiredFields.filter(
+      (key) => !formData[key] || Number(formData[key]) <= 0
+    );
 
+    if (missingFields.length > 0) {
+      const missingFieldNames = missingFields
+        .map((key) =>
+          key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+        )
+        .join(", ");
+      setMessage({
+        type: "warning",
+        message: `The following fields are invalid or missing: ${missingFieldNames}.`,
+      });
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
+    if (
+      ["price", "reorder_level", "reorder_quantity", "stock_level"].some(
+        (key) => Number(formData[key]) <= 0
+      )
+    ) {
+      setMessage({
+        type: "warning",
+        message:
+          "Values for Price, Reorder Level, Reorder Quantity, and Stock Level must be greater than 0.",
+      });
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
+    if (title == "Add Product") createProduct();
+    else updateProduct(); 
   };
   const updateProduct = async () => {
     try {
@@ -340,8 +599,8 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      fetchProduct()
-      handleClose();
+ 
+      fetchProduct();  
     } catch (error) {
       console.log(error);
     }
@@ -372,16 +631,15 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      fetchProduct()
-      handleClose();
+ 
+      fetchProduct();  
     } catch (error) {
       console.log(error);
     }
   };
 
   const fetchProduct = async () => {
-    if (!shop) return null;
-    console.log(shop.id)
+    if (!shop) return null; 
     try {
       const response = await fetch(
         `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
@@ -396,16 +654,31 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      console.log("Content-Type", response.products)
-      setProducts(response.products)
+        setProducts(response.products);  
+        handleClose(); 
     } catch (error) {
       console.log(error);
     }
-  };
+  }; 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle> {title}</DialogTitle>
       <DialogContent>
+        {message.message && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: "100px",
+              right: "20px",
+              zIndex: 1000, // Ensures it is above other components
+              minWidth: "250px",
+            }}
+          >
+            <Alert severity={message.type} variant="filled">
+              {message.message}
+            </Alert>
+          </Box>
+        )}
         <Grid container spacing={3}>
           <Grid item xs={8}>
             <Box
@@ -427,7 +700,18 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
                 ))}
               </TextField>
 
-              <TextField
+              <TextField 
+                label="Selected File Name  "
+                name="media_ids"
+                value={selectedFileName}
+                onChange={handleChange}
+                fullWidth
+                InputProps={{
+                  readOnly: true,
+                }}
+              />
+
+              <TextField 
                 label="Product Name"
                 name="name"
                 value={formData.name}
@@ -479,13 +763,13 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
               }
               onFileNameChange={(fileName) => setSelectedFileName(fileName)}
               user={user}
-              url={null}
+              url={product?.avatar?.map((item) => item.url) || null}
             />
           </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="secondary">
+        <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained" color="primary">
@@ -496,14 +780,7 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
   );
 };
 
-const ViewShopDialog = ({
-  open,
-  handleClose,
-  handleSubmit,
-  user,
-  shop,
-  handleOpen,
-}) => {
+const ViewShopDialog = ({ open, handleClose, user, shop, handleOpen }) => {
   const [userInput, setUserInput] = useState({
     name: shop.name,
     phone: shop.phone,
@@ -512,6 +789,47 @@ const ViewShopDialog = ({
     district: shop.address.district,
     media_ids: shop.avatar_obj.url,
   });
+  const [message, setMessage] = useState({ type: "", message: "" });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setUserInput((prev) => ({
+      ...prev,
+      [name]:
+        name === "price"
+          ? value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+          : value,
+    }));
+  };
+  const phoneRegExp =
+    /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+  const handleSubmit = () => {
+    const requiredFields = ["name", "phone", "city", "street", "district"];
+    const missingFields = requiredFields.filter(
+      (key) => !userInput[key] || Number(userInput[key]) <= 0
+    );
+
+    if (missingFields.length > 0) {
+      const missingFieldNames = missingFields
+        .map((key) =>
+          key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+        )
+        .join(", ");
+      setMessage({
+        type: "warning",
+        message: `The following fields are invalid or missing: ${missingFieldNames}.`,
+      });
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
+    if (!phoneRegExp.test(userInput.phone)) {
+      setMessage({ type: "warning", message: "Phone number is not valid." });
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
+    UpdateShop();
+  };
   useEffect(() => {
     if (!open) {
       setUserInput({
@@ -545,14 +863,17 @@ const ViewShopDialog = ({
         .then((res) => res.data);
       dispatch(setShop(null));
       setOpenDelete(false);
-      navigate("/user/create-shop")
+ 
+      navigate("/user/create-shop"); 
     } catch (error) {
       console.error(error);
     }
   };
+
   const UpdateShop = async () => {
     try {
-      const res = await fetch("http://tancatest.me/api/v1/shops", {
+      // Update shop details
+      const updateResponse = await fetch("http://tancatest.me/api/v1/shops", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -566,99 +887,147 @@ const ViewShopDialog = ({
           city: userInput.city,
           street: userInput.street,
           district: userInput.district,
+ 
+          ids: [shop.id],
         }),
-      })
-        .then((res) => res.json())
-        .then((res) => res.data);
+      });
 
+      if (!updateResponse.ok) {
+        throw new Error("Failed to update shop details.");
+      }
+
+      const updateResult = await updateResponse.json();
+      console.log("Shop update result:", updateResult);
+
+      // Fetch shop details by ID
+      const shopResponse = await fetch(
+        `http://tancatest.me/api/v1/shops/${shop.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          },
+        }
+      );
+
+      if (!shopResponse.ok) {
+        throw new Error("Failed to fetch shop details.");
+      }
+
+      const shopResult = await shopResponse.json();
+      const newshop = shopResult.data;
+      console.log("Fetched shop details:", shop);
+
+      // Update Redux store
+      dispatch(setShop(newshop));
+      setMessage({
+        type: "success",
+        message: `Shop Updated.`,
+      });
+      setTimeout(() => setMessage(""), 3000); 
     } catch (error) {
-      console.error(error);
+      console.error("Error during shop update process:", error.message);
     }
   };
   return (
     <Box>
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm" /*maxWidth="md"*/
+      >
         <DialogTitle>Shop Detail</DialogTitle>
         <DialogContent>
-          <Grid container spacing={3}>
-            <Grid item xs={8}>
-              <Box
-                component="form"
-                sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          {message.message && (
+            <Box
+              sx={{
+                position: "fixed",
+                top: "100px",
+                right: "20px",
+                zIndex: 1000, // Ensures it is above other components
+                minWidth: "250px",
+              }}
+            >
+              <Alert severity={message.type} variant="filled">
+                {message.message}
+              </Alert>
+            </Box>
+          )}
+          {/* <Grid container spacing={3}> */}
+          <Grid item xs={8}>
+            <Box
+              component="form"
+              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            >
+              <TextField
+                label="Name"
+                name="name"
+                value={userInput.name}
+                onChange={handleChange}
+                fullWidth
+                sx={{ mt: 2 }}
+              />
+
+              <TextField
+                label="Phone"
+                name="phone"
+                value={userInput.phone}
+                onChange={handleChange}
+                fullWidth
+              />
+
+              <TextField
+                label="City"
+                name="city"
+                value={userInput.city}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                label="District"
+                name="district"
+                value={userInput.district}
+                onChange={(e) =>
+                  setUserInput({ ...userInput, district: e.target.value })
+                }
+                fullWidth
+              />
+              <TextField
+                label="Street"
+                name="street"
+                value={userInput.street}
+                onChange={handleChange}
+                fullWidth
+              />
+              <Typography
+                onClick={() => {
+                  setMapOpen(true);
+                }}
+                sx={{
+                  textDecoration: "underline",
+                  color: "#00D5FA",
+                  "&:hover": {
+                    cursor: "pointer",
+                    color: "#E6FBFF",
+                  },
+                }}
               >
-                <TextField
-                  label="Name"
-                  name="name"
-                  value={userInput.name}
-                  onChange={(e) =>
-                    setUserInput({ ...userInput, name: e.target.value })
-                  }
-                  fullWidth
-                  sx={{ mt: 2 }}
-                />
-
-                <TextField
-                  label="Phone"
-                  name="phone"
-                  value={userInput.phone}
-                  onChange={(e) =>
-                    setUserInput({ ...userInput, phone: e.target.value })
-                  }
-                  fullWidth
-                />
-
-                <TextField
-                  label="City"
-                  name="city"
-                  value={userInput.city}
-                  onChange={(e) =>
-                    setUserInput({ ...userInput, city: e.target.value })
-                  }
-                  fullWidth
-                />
-                <TextField
-                  label="District"
-                  name="district"
-                  value={userInput.district}
-                  onChange={(e) =>
-                    setUserInput({ ...userInput, district: e.target.value })
-                  }
-                  fullWidth
-                />
-                <TextField
-                  label="Street"
-                  name="street"
-                  value={userInput.street}
-                  onChange={(e) =>
-                    setUserInput({ ...userInput, street: e.target.value })
-                  }
-                  fullWidth
-                />
-                <Typography
-                  onClick={() => {
-                    setMapOpen(true);
-                  }}
-                  sx={{
-                    textDecoration: "underline",
-                    color: "#3B82F6",
-                    "&:hover": {
-                      cursor: "pointer",
-                      color: "#E6FBFF",
-                    },
-                  }}
-                >
-                  "Choose address from the maps"
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid
+ 
+                "Choose address from the maps"
+              </Typography>
+            </Box>
+          </Grid>
+          {/* <Grid 
               item
               xs={4}
               sx={{ display: "flex", justifyContent: "center" }}
             >
-              <ImageUpload
+              <SingleImageUpload
                 onUpload={(mediaId) =>
-                  setUserInput({
+                  handleChange({
                     target: { name: "media_ids", value: mediaId },
                   })
                 }
@@ -666,8 +1035,8 @@ const ViewShopDialog = ({
                 user={user}
                 url={shop.avatar_obj.url}
               />
-            </Grid>
-          </Grid>
+            </Grid> */}
+          {/* </Grid> */}
           <Box
             display="flex"
             justifyContent="space-between"
@@ -690,7 +1059,7 @@ const ViewShopDialog = ({
                 Cancel
               </Button>
               <Button
-                onClick={UpdateShop}
+                onClick={handleSubmit}
                 variant="contained"
                 color="primary"
               >
@@ -710,7 +1079,7 @@ const ViewShopDialog = ({
               setOpenDelete(false);
               handleOpen();
             }}
-            color="secondary"
+            color="primary"
           >
             Cancel
           </Button>
@@ -913,14 +1282,16 @@ const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
 export default function ViewYourShop() {
   const { user } = useSelector((state) => state.auth);
   const { shop } = useSelector((state) => state.shop);
+  const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
   const [products, setproducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
-
-  const navigate = useNavigate();
-
+  const [edit, setEdit] = useState(false); 
+  const [editProduct, setEditProduct] = useState();
+  const [editProductId, setEditProductId] = useState();
+   
   const fetchCategories = async () => {
     try {
       const cates = await fetch("http://tancatest.me/api/v1/categories ", {
@@ -934,17 +1305,12 @@ export default function ViewYourShop() {
     } catch (error) {
       console.error(error);
     }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-    fetchProduct();
-  }, [shop]);
-
-
+ 
+  }; 
+   
   const fetchProduct = async () => {
     if (!shop) return null;
-    console.log(shop.id)
+    console.log(shop.id); 
     try {
       const response = await fetch(
         `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
@@ -959,14 +1325,20 @@ export default function ViewYourShop() {
       )
         .then((response) => response.json())
         .then((response) => response.data);
-      console.log("Content-Type", response.products)
-      setproducts(response.products)
+ 
+      console.log("Content-Type", response.products);
+      setproducts(response.products); 
       setOpen(false);
     } catch (error) {
       console.log(error);
     }
-  };
-
+  }; 
+   
+  useEffect(() => {
+    fetchCategories();
+    fetchProduct();
+  }, [shop]);
+    
   if (!shop) return null;
   if (shop.is_verified === false)
     return (
@@ -986,11 +1358,20 @@ export default function ViewYourShop() {
       <HeaderSection
         handleClickOpen={() => setOpen(true)}
         handleClickOpen2={() => setOpen2(true)}
-      />
-      {products?.length === 0 ?
-        <DotLoader></DotLoader> :
-        <ProductsTable products={products} setProducts={setproducts} user={user} categories={categories} ></ProductsTable>
-      }
+      /> 
+      {products?.length === 0 ? (
+        <DotLoader></DotLoader>
+      ) : (
+        <ProductsTable
+          products={products}
+          setProducts={setproducts}
+          user={user}
+          categories={categories}
+          setEdit={setEdit}
+          setEditProduct={setEditProduct}
+          setEditProductId={setEditProductId}
+        ></ProductsTable>
+      )} 
 
       <AddEditProductDialog
         open={open}
@@ -999,7 +1380,18 @@ export default function ViewYourShop() {
         categories={categories}
         user={user}
         setProducts={setproducts}
-        shop={shop}
+        shop={shop} 
+      />
+      <AddEditProductDialog
+        open={edit}
+        product={editProduct}
+        product_id={editProductId}
+        title="Edit Product"
+        handleClose={() => setEdit(false)}
+        categories={categories}
+        user={user}
+        setProducts={setproducts}
+        shop={shop} 
       />
       <ViewShopDialog
         shop={shop}
