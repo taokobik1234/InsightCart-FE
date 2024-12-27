@@ -402,7 +402,6 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
       console.log(error);
     }
   };
-
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle> {title}</DialogTitle>
@@ -427,17 +426,6 @@ const AddEditProductDialog = ({ open, handleClose, categories, user, title, prod
                   </MenuItem>
                 ))}
               </TextField>
-
-              <TextField
-                label="Media ID"
-                name="media_ids"
-                value={selectedFileName || formData.media_ids}
-                onChange={handleChange}
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
 
               <TextField
                 label="Product Name"
