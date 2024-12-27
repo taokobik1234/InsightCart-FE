@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams, NavLink, useNavigate } from "react-router-dom";
 import ListProductCard from "../../components/ListProductCard";
 import ServiceCard from "../../components/ServiceCard";
 import { Alert, Box } from "@mui/material";
 import { useSelector } from "react-redux";
 
 export default function ProductDetailPage() {
+    const navigate = useNavigate();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     const { productId } = useParams();
     const [images, setImages] = useState([]);
@@ -103,6 +104,15 @@ export default function ProductDetailPage() {
             console.error("Error adding to cart:", error);
         }
     }
+
+    const handleViewShop = () => {
+        if (!isAuthenticated) {
+            setMessage({ type: "warning", message: "You need to sign in to View Shop" });
+            setTimeout(() => setMessage(""), 3000);
+            return;
+        }
+        navigate(`/shop/${productDetail.shop_id}`);
+    }
     return (
         <div className="bg-gray-100 min-h-screen py-10">
             {/* details */}
@@ -156,8 +166,8 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="flex items-center space-x-2 text-sm mb-4">
                         <span className="text-black-500">Seller: {productDetail.shop_name}</span>
-                      
-                    </div>        
+
+                    </div>
                     <h2 className="text-3xl font-bold mb-2">${productDetail.price}</h2>
                     <p className="text-gray-600 mb-4">
                         PlayStation 5 Controller Skin High quality vinyl with air channel
@@ -235,8 +245,8 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
                 </div>
-            </div>                    
-           {/* Shop Information */}
+            </div>
+            {/* Shop Information */}
             <div className="max-w-7xl mx-auto p-6 bg-white mt-10">
                 <div className="flex items-start space-x-4 border-b pb-6 mb-6">
                     {/* Shop Logo */}
@@ -256,7 +266,7 @@ export default function ProductDetailPage() {
                             <p className="text-gray-500">Online {productDetail.last_active || "N/A"} ago</p>
                         </div>
 
-                         
+
                     </div>
                     <div className="flex-1 flex justify-between items-center " >
                         {/* Shop Statistics */}
@@ -269,7 +279,7 @@ export default function ProductDetailPage() {
                                 <span className="text-gray-500">Products Count</span>
                                 <p className="font-bold">{productDetail.shop_products || "N/A"}</p>
                             </div>
-                            
+
                             <div>
                                 <span className="text-gray-500">Join date </span>
                                 <p className="font-bold">{productDetail.joined_date || "N/A"}</p>
@@ -278,18 +288,17 @@ export default function ProductDetailPage() {
                                 <span className="text-gray-500">Followers</span>
                                 <p className="font-bold">{productDetail.followers || "N/A"}</p>
                             </div>
-                        </div> 
-                    </div>            
+                        </div>
+                    </div>
                     {/* Actions */}
                     <div className="flex space-x-4">
                         <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                             Chat Now
                         </button>
-                        <NavLink to={`/shop/${productDetail.shop_id}`}> 
-                        <button className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-100">
+                        <button className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-100" onClick={handleViewShop}>
                             View Shop
                         </button>
-                        </NavLink> 
+
                     </div>
                 </div>
             </div>

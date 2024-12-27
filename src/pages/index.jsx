@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import CarouselComponent from "../components/carousel";
 import { NavLink, useLocation } from "react-router-dom";
 import ListProductCard from "../components/ListProductCard";
 import ps5 from "../assets/ps5.png"
 import ServiceCard from "../components/ServiceCard";
 import DotLoader from "../components/ui/DotLoader";
+import { fetchRecommendedProducts, setCurrentPage } from "../store/productslice";
 function HomeScreen() {
     const [categories, setCategories] = useState([]);
-    const [allProducts, setAllProducts] = useState([]);
-    const [recommendedProducts, setRecommendedProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const ITEMS_PER_PAGE = 15; // Define items per page
+    const { items: allProducts, loading, recommendedProducts, loadingMore, hasMore, currentPage } = useSelector(state => state.products);
+    const dispatch = useDispatch();
     const location = useLocation();
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -36,72 +33,16 @@ function HomeScreen() {
 
         fetchCategories();
     }, []);
-
-
     useEffect(() => {
-        const fetchAllProducts = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(
-                    `http://tancatest.me/api/v1/shops/products/all`,
-                    {
-                        method: "GET",
-                    }
-                );
-                const data = await response.json();
-                setAllProducts(data.data.items || []);
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAllProducts();
-    }, []);
-
-    useEffect(() => {
-        const fetchRecommendedProducts = async (page = 1) => {
-            try {
-                if (page === 1) {
-                    setLoading(true);
-                } else {
-                    setLoadingMore(true);
-                }
-                
-                const response = await fetch(
-                    `http://tancatest.me/api/v1/shops/products/all?page=${page}&limit=${ITEMS_PER_PAGE}`,
-                    {
-                        method: "GET",
-                    }
-                );
-                const data = await response.json();
-                
-                const newItems = data.data.items || [];
-                
-                if (page === 1) {
-                    setRecommendedProducts(newItems);
-                } else {
-                    setRecommendedProducts(prevProducts => [...prevProducts, ...newItems]); // Append new items to existing ones
-                }
-                
-                // Check if we have more pages based on total count from API
-                setHasMore(data.data.meta.total > page * ITEMS_PER_PAGE);
-            } catch (error) {
-                console.error("Error fetching recommended products:", error);
-                setHasMore(false);
-            } finally {
-                setLoading(false);
-                setLoadingMore(false);
-            }
-        };
-
-        fetchRecommendedProducts(currentPage);
-    }, [currentPage]);
+        if (recommendedProducts.length === 0) {
+            dispatch(fetchRecommendedProducts({ page: currentPage }));
+        }
+    }, [dispatch, currentPage, recommendedProducts.length]);
 
     const handleLoadMore = () => {
         if (!loadingMore && hasMore) {
-            setCurrentPage(prev => prev + 1);
+            dispatch(setCurrentPage(currentPage + 1));
+            dispatch(fetchRecommendedProducts({ page: currentPage + 1 }));
         }
     };
 
@@ -248,7 +189,7 @@ function HomeScreen() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
                             {recommendedProducts.map((product) => (
                                 <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                    <NavLink to={`/products/detail/${product.id}`}>
+                                    <NavLink to={`/products/details/${product.id}`}>
                                         <div className="relative h-48">
                                             <img
                                                 src={product.images[0]?.url || 'placeholder-image-url'}

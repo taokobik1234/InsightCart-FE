@@ -10,7 +10,8 @@ import ResetPassword from "./pages/auth/reset-password";
 import Header from "./components/Header";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setUser, checkAuth } from "./store/userslice";
+import { checkAuth } from "./store/userslice";
+import { fetchAllProducts } from "./store/productslice";
 import CheckAuth from "./components/auth/CheckAuth";
 import UserLayout from "./components/user/UserLayout";
 import Profile from "./pages/user/profile";
@@ -41,6 +42,9 @@ function App() {
     const user = JSON.parse(auth).user;
     if (!user) return;
   }, [persistAuth, dispatch, isAuthenticated, checkAuth]);
+  useEffect(() => {
+    dispatch(fetchAllProducts());
+  }, [dispatch]);
   return (
     <div>
       <CheckAuth>

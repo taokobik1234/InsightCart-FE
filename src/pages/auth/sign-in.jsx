@@ -1,4 +1,5 @@
-import { Box, Typography, useMediaQuery, TextField, Button, Alert } from "@mui/material";
+import { Box, Typography, useMediaQuery, TextField, Button, Alert, IconButton, InputAdornment, } from "@mui/material";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,10 @@ const LoginScreen = () => {
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
   const [errorText, setErrorText] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const handleSignIn = async (values, onSubmitProps) => {
     try {
       const API_URL = "http://tancatest.me/api/v1/users/sign-in"
@@ -114,7 +119,7 @@ const LoginScreen = () => {
                   />
                   <TextField
                     label="Password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={values.password}
@@ -122,6 +127,19 @@ const LoginScreen = () => {
                     error={Boolean(touched.password) && Boolean(errors.password)}
                     helperText={touched.password && errors.password}
                     sx={{ gridColumn: "span 4" }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={togglePasswordVisibility}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
                   />
                 </Box>
                 <Box>
