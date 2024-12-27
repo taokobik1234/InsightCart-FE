@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import CarouselComponent from "../components/carousel";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ListProductCard from "../components/ListProductCard";
 import ps5 from "../assets/ps5.png"
 import ServiceCard from "../components/ServiceCard";
@@ -13,6 +13,7 @@ function HomeScreen() {
     const [randomizedProducts, setRandomizedProducts] = useState([]);
     const dispatch = useDispatch();
     const location = useLocation();
+    const navigate = useNavigate();
 
     // Shuffle array function using Fisher-Yates algorithm
     const shuffleArray = (array) => {
@@ -154,14 +155,14 @@ function HomeScreen() {
                     <div className="w-1/2 relative">
                         <img
                             src={ps5}
-                            alt="PlayStation 5"
+                            alt="Ultra allow - Fund 5"
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute bottom-8 left-8">
-                            <h1 className="text-4xl font-bold mb-2 text-white">PlayStation 5</h1>
+                            <h1 className="text-4xl font-bold mb-2 text-white">Ultra allow - Fund</h1>
                             <p className="text-lg text-white">
-                                Black and White version of the PS5 <br />
-                                coming out on sale.
+
+
                             </p>
                         </div>
                     </div>
@@ -189,7 +190,10 @@ function HomeScreen() {
                         </div>
 
                         {/* Shop Now Button */}
-                        <button className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded">
+                        <button 
+                            onClick={() => navigate('/products/details/676e4bae0e533285bbc7a869')}
+                            className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded"
+                        >
                             Shop now
                         </button>
                     </div>

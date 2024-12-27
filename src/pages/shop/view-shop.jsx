@@ -14,7 +14,7 @@ import {  Menu, MenuItem } from '@mui/material';
   import {  useSelector } from "react-redux";
   import DotLoader from "../../components/ui/DotLoader";  
   import { useNavigate } from "react-router-dom";
-  import React, { useRef ,useState, useEffect } from "react"; 
+  import React, { useRef ,useState, useEffect, useCallback } from "react"; 
   
   
   export default function ViewShop() {
@@ -26,8 +26,26 @@ import {  Menu, MenuItem } from '@mui/material';
     const [categories, setCategories] = useState([]);
     const [products, setproducts] = useState([]); 
     const [productss, setproductss] = useState([]);
+    const [randomProducts, setRandomProducts] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null); // Menu anchor element
     const [sortOrder, setSortOrder] = useState("Low to High"); // Default sort order
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const productsPerPage = 16; // Changed to match API's default per_page
+  
+    // Add debounce function
+    const debounce = (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
   
     const handleClick = (event) => {
       setAnchorEl(event.currentTarget); // Open the menu when the button is clicked
@@ -91,30 +109,81 @@ import {  Menu, MenuItem } from '@mui/material';
         return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
       }
       
-      const fetchProduct = async () => { 
-        try {
-          const response = await fetch(
-            `http://tancatest.me/api/v1/shops/products?shop_id=${shopId} 
-            `,
-            { 
-              headers: {
-                "Content-Type": "application/json",
-                "session-id": user.session_id,
-                Authorization: `Bearer ${user.token.AccessToken}`,
-                "x-client-id": user.id,
-              }, 
-            }
-          )
-            .then((response) => response.json())
-            .then((response) => response.data);
-          console.log("Content-Type",response.products)   
-          setproducts(response.products) 
-          setproductss(response.products)   
-          console.log(products)  
-        } catch (error) {
-          console.log(error);
+      const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-      };   
+        return shuffled;
+      };
+      
+      const handlePageChange = async (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages && !isLoading) {
+            setIsLoading(true);
+            setCurrentPage(newPage);
+            try {
+                const response = await fetch(
+                    `http://tancatest.me/api/v1/shops/products?shop_id=${shopId}&page=${newPage}&limit=${productsPerPage}`,
+                    { 
+                        headers: {
+                            "Content-Type": "application/json",
+                            "session-id": user.session_id,
+                            Authorization: `Bearer ${user.token.AccessToken}`,
+                            "x-client-id": user.id,
+                        }, 
+                    }
+                );
+                const data = await response.json();
+                if (data.error_code === 0) {
+                    setproducts(data.data.products);
+                    setTotalPages(data.data.meta.total_pages);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+      
+    // Debounced version of handlePageChange
+    const debouncedHandlePageChange = useCallback(
+        debounce((newPage) => handlePageChange(newPage), 300),
+        [shopId, user]
+    );
+      
+    const fetchProduct = async () => { 
+        setIsLoading(true);
+        try {
+            const response = await fetch(
+                `http://tancatest.me/api/v1/shops/products?shop_id=${shopId}&page=${currentPage}&limit=${productsPerPage}`,
+                { 
+                    headers: {
+                        "Content-Type": "application/json",
+                        "session-id": user.session_id,
+                        Authorization: `Bearer ${user.token.AccessToken}`,
+                        "x-client-id": user.id,
+                    }, 
+                }
+            );
+            const data = await response.json();
+            if (data.error_code === 0) {
+                const allProducts = data.data.products;
+                setproducts(allProducts);
+                setproductss(allProducts);
+                setTotalPages(data.data.meta.total_pages);
+                
+                // Set random products for recommendations
+                const shuffled = shuffleArray(allProducts);
+                setRandomProducts(shuffled.slice(0, 6));
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };   
     useEffect(() => {
         fetchShop()
         fetchProduct() 
@@ -255,23 +324,49 @@ import {  Menu, MenuItem } from '@mui/material';
                   
           {/* Product Recommendations */}
           <Box id="recom-products-section" ref={recomProductsRef} sx={{ padding: 2 }}>
-            <Typography variant="h6">Your Recomment</Typography>
+            <Typography variant="h6">Your Recommend</Typography>
             <Grid container spacing={2}>
-              {[1, 2, 3, 4,5,6  ].map((product) => (
-                <Grid item xs={2} sm={2} md={2} key={product}>
-                  <Card>
+              {randomProducts.map((product) => (
+                <Grid item xs={2} sm={2} md={2} key={product.id}>
+                  <Card 
+                    onClick={() => navigate(`/products/details/${product.id}`)} 
+                    sx={{ 
+                      '&:hover': {
+                        cursor: 'pointer',
+                        boxShadow: 3,
+                      },
+                      height: '100%', // Make all cards same height
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <CardMedia
                       component="img"
-                      height="10"
-                      image="https://via.placeholder.com/150"
-                      alt="Product Image"
+                      sx={{
+                        width: '100%',
+                        height: 200, // Fixed height for images
+                        objectFit: 'cover'
+                      }}
+                      image={product.avatar ? product.avatar[0].url : "https://via.placeholder.com/150"}
+                      alt={product.name}
                     />
-                    <CardContent>
-                      <Typography variant="subtitle1">Product Name</Typography>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Price: 99,000₫
-                      </Typography>
-                      <Button variant="contained" size="small" color="primary">
+                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <Tooltip title={product.name || "Unnamed Product"} arrow>
+                          <Typography variant="subtitle1" noWrap>
+                            {product.name || "Unnamed Product"}
+                          </Typography>
+                        </Tooltip>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Price: {product.price}₫
+                        </Typography>
+                      </div>
+                      <Button 
+                        variant="contained" 
+                        size="small" 
+                        color="primary"
+                        sx={{ mt: 1 }}
+                      >
                         Buy Now
                       </Button>
                     </CardContent>
@@ -343,38 +438,74 @@ import {  Menu, MenuItem } from '@mui/material';
                 ))}
              </Box>
              <Grid container spacing={2}>
-              {products.map((product) => (
-                <Grid item  xs={6} sm={4} md={3} key={product.id}>
-                  <Card onClick={() => navigate(`/products/details/${product.id}`)} sx={{ 
-                        '&:hover': {
-                        cursor: 'pointer',
-                        boxShadow: 3,
-                        },
-                    }}>
-                    <CardMedia
-                      component="img"
-                      style={{ width: '100%', aspectRatio: '1' }}
-                      image= {product.avatar? product.avatar[0].url : "https://via.placeholder.com/150"}
-                      alt="Product Image"
-                    />
-                    <CardContent>
-                    <Tooltip title={product.name || "Unnamed Product"} arrow>
-                      <Typography variant="subtitle1" noWrap>
-                        {product.name || "Unnamed Product"}
-                      </Typography>
-                    </Tooltip>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Price: {product.price}₫
-                      </Typography>
-                      <Button variant="contained" size="small" color="primary">
-                        Buy Now
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
+              {isLoading ? (
+                  <Box display="flex" justifyContent="center" width="100%" py={4}>
+                      <DotLoader />
+                  </Box>
+              ) : (
+                  products.map((product) => (
+                    <Grid item  xs={6} sm={4} md={3} key={product.id}>
+                      <Card onClick={() => navigate(`/products/details/${product.id}`)} sx={{ 
+                            '&:hover': {
+                            cursor: 'pointer',
+                            boxShadow: 3,
+                            },
+                        }}>
+                        <CardMedia
+                          component="img"
+                          style={{ width: '100%', aspectRatio: '1' }}
+                          image= {product.avatar? product.avatar[0].url : "https://via.placeholder.com/150"}
+                          alt="Product Image"
+                        />
+                        <CardContent>
+                        <Tooltip title={product.name || "Unnamed Product"} arrow>
+                          <Typography variant="subtitle1" noWrap>
+                            {product.name || "Unnamed Product"}
+                          </Typography>
+                        </Tooltip>
+                          <Typography variant="subtitle2" color="text.secondary">
+                            Price: {product.price}₫
+                          </Typography>
+                          <Button variant="contained" size="small" color="primary">
+                            Buy Now
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))
+              )}
             </Grid>
             </Box>              
+            {/* Pagination */}
+            <Box display="flex" justifyContent="center" mt={4} gap={2}>
+                <Button 
+                    variant="outlined" 
+                    disabled={currentPage === 1 || isLoading}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                >
+                    Previous
+                </Button>
+                <Box display="flex" alignItems="center" gap={1}>
+                    {[...Array(totalPages)].map((_, index) => (
+                        <Button
+                            key={index + 1}
+                            variant={currentPage === index + 1 ? "contained" : "outlined"}
+                            onClick={() => handlePageChange(index + 1)}
+                            disabled={isLoading}
+                            size="small"
+                        >
+                            {index + 1}
+                        </Button>
+                    ))}
+                </Box>
+                <Button 
+                    variant="outlined"
+                    disabled={currentPage === totalPages || isLoading}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    Next
+                </Button>
+            </Box>
           </Box> 
           </Container>  
         </div>

@@ -232,15 +232,20 @@ export default function CartScreen() {
                                                         />
                                                     </td>
                                                     <td className="p-3 flex items-center gap-3">
-                                                        <img
-                                                            src={
-                                                                product.medias?.[0]?.url ||
-                                                                "https://via.placeholder.com/250"
-                                                            }
-                                                            alt={product.product_name}
-                                                            className="w-12 h-12 object-cover"
-                                                        />
-                                                        <span>{product.product_name}</span>
+                                                        <div 
+                                                            className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+                                                            onClick={() => navigate(`/products/details/${product.product_id}`)}
+                                                        >
+                                                            <img
+                                                                src={
+                                                                    product.medias?.[0]?.url ||
+                                                                    "https://via.placeholder.com/250"
+                                                                }
+                                                                alt={product.product_name}
+                                                                className="w-12 h-12 object-cover"
+                                                            />
+                                                            <span className="hover:text-blue-600">{product.product_name}</span>
+                                                        </div>
                                                     </td>
                                                     <td className="p-3">${product.price.toFixed(2)}</td>
                                                     <td className="p-3">
