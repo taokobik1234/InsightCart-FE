@@ -1284,7 +1284,7 @@ export default function ViewYourShop() {
     fetchCategories();
     fetchProduct();
     fetchVoucher();
-  }, [shop]);
+  }, [shop, setVouchers]);
 
   if (!shop) return null;
   if (shop.is_verified === false)
@@ -1381,6 +1381,7 @@ export default function ViewYourShop() {
             open={isVoucherDialogOpen}
             handleClose={() => setVoucherDialogOpen(false)}
             title={"Add Voucher"}
+            setVouchers={setVouchers}
             shop={shop}
             user={user}
           />

@@ -13,13 +13,10 @@ import {
     DialogTitle,
     Button,
     Card,
-    Box,
 } from "@mui/material";
 
 const VouchersTable = ({ vouchers }) => {
     const [openDelete, setOpenDelete] = useState(false);
-    const [id, setId] = useState(null);
-
 
     return (
         <>
@@ -41,7 +38,6 @@ const VouchersTable = ({ vouchers }) => {
                                 "Usage Limit",
                                 "Valid From",
                                 "Valid To",
-                                "Action",
                             ].map((head) => (
                                 <Tooltip title={head} key={head} arrow>
                                     <TableCell
@@ -62,64 +58,62 @@ const VouchersTable = ({ vouchers }) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {vouchers.map((voucher, index) => (
-                            <TableRow key={voucher.id}>
-                                <Tooltip title={voucher.name} arrow>
-                                    <TableCell align="center">{voucher.name}</TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.code} arrow>
-                                    <TableCell align="center">{voucher.code}</TableCell>
-                                </Tooltip>
-                                <Tooltip title={`${voucher.discount_amount}%`} arrow>
-                                    <TableCell align="center">{voucher.discount_amount}</TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.minimum_order_amount} arrow>
-                                    <TableCell align="center">
-                                        {voucher.minimum_order_amount}
-                                    </TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.max_discount_amount} arrow>
-                                    <TableCell align="center">
-                                        {voucher.max_discount_amount}
-                                    </TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.usage_limit} arrow>
-                                    <TableCell align="center">{voucher.usage_limit}</TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.valid_from} arrow>
-                                    <TableCell align="center">{voucher.valid_from}</TableCell>
-                                </Tooltip>
-                                <Tooltip title={voucher.valid_to} arrow>
-                                    <TableCell align="center">{voucher.valid_to}</TableCell>
-                                </Tooltip>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column" alignItems="center">
-                                        <Button
-                                            variant="text"
-                                            color="primary"
-                                            size="small"
-                                            onClick={() => {
-                                                // Handle edit voucher logic here
-                                            }}
+                        {vouchers &&
+                            vouchers
+                                .filter((voucher) => voucher) // Filter out undefined or null values
+                                .map((voucher, index) => (
+                                    <TableRow key={voucher.id || index}>
+                                        <Tooltip title={voucher.name || "N/A"} arrow>
+                                            <TableCell align="center">{voucher.name || "N/A"}</TableCell>
+                                        </Tooltip>
+                                        <Tooltip title={voucher.code || "N/A"} arrow>
+                                            <TableCell align="center">{voucher.code || "N/A"}</TableCell>
+                                        </Tooltip>
+                                        <Tooltip
+                                            title={`${voucher.discount_amount || 0}%`}
+                                            arrow
                                         >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            variant="text"
-                                            color="error"
-                                            size="small"
-                                            onClick={() => {
-                                                setOpenDelete(true);
-                                                setId(voucher.id);
-                                            }}
+                                            <TableCell align="center">
+                                                {voucher.discount_amount || "N/A"}
+                                            </TableCell>
+                                        </Tooltip>
+                                        <Tooltip
+                                            title={
+                                                voucher.minimum_order_amount !== undefined
+                                                    ? voucher.minimum_order_amount
+                                                    : "N/A"
+                                            }
+                                            arrow
                                         >
-                                            Delete
-                                        </Button>
-                                    </Box>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                            <TableCell align="center">
+                                                {voucher.minimum_order_amount || "N/A"}
+                                            </TableCell>
+                                        </Tooltip>
+                                        <Tooltip
+                                            title={
+                                                voucher.max_discount_amount !== undefined
+                                                    ? voucher.max_discount_amount
+                                                    : "N/A"
+                                            }
+                                            arrow
+                                        >
+                                            <TableCell align="center">
+                                                {voucher.max_discount_amount || "N/A"}
+                                            </TableCell>
+                                        </Tooltip>
+                                        <Tooltip title={voucher.usage_limit || "N/A"} arrow>
+                                            <TableCell align="center">{voucher.usage_limit || "N/A"}</TableCell>
+                                        </Tooltip>
+                                        <Tooltip title={voucher.valid_from || "N/A"} arrow>
+                                            <TableCell align="center">{voucher.valid_from || "N/A"}</TableCell>
+                                        </Tooltip>
+                                        <Tooltip title={voucher.valid_to || "N/A"} arrow>
+                                            <TableCell align="center">{voucher.valid_to || "N/A"}</TableCell>
+                                        </Tooltip>
+                                    </TableRow>
+                                ))}
                     </TableBody>
+
                 </Table>
             </TableContainer>
 

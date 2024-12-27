@@ -19,6 +19,7 @@ const AddEditVoucherDialog = ({
     title,
     user,
     shop,
+    setVouchers,
 }) => {
     const [formData, setFormData] = useState({
         applicable_category_ids: [],
@@ -111,9 +112,10 @@ const AddEditVoucherDialog = ({
                 body: JSON.stringify(payload),
             });
             const data = await response.json();
-
+            console.log(data);
             if (data.message === "Success") {
                 setMessage({ type: "success", message: "Voucher created successfully!" });
+                setVouchers((prev) => [...prev, data.data]);
                 handleClose();
             } else {
                 setMessage({ type: "error", message: data.message || "Error creating voucher." });
