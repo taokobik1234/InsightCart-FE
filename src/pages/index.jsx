@@ -13,7 +13,7 @@ function HomeScreen() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    const ITEMS_PER_PAGE = 8; // Define items per page
+    const ITEMS_PER_PAGE = 15; // Define items per page
     const location = useLocation();
     useEffect(() => {
         window.scrollTo(0, 0);
