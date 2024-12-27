@@ -213,28 +213,6 @@ export default function ProductDetailPage() {
                         sensitive.
                     </p>
 
-                    {/* Colours */}
-                    <div className="mb-4">
-                        <span className="font-semibold mr-4">Colours:</span>
-                        <button className="w-6 h-6 rounded-full bg-gray-700 border border-gray-300 mr-2"></button>
-                        <button className="w-6 h-6 rounded-full bg-red-500 border border-gray-300"></button>
-                    </div>
-
-                    {/* Sizes */}
-                    <div className="mb-6">
-                        <span className="font-semibold mr-4">Size:</span>
-                        <div className="inline-flex space-x-2">
-                            {["XS", "S", "M", "L", "XL"].map((size) => (
-                                <button
-                                    key={size}
-                                    className="px-3 py-1 border rounded hover:bg-gray-100"
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
                     {/* Quantity and Buy */}
                     <div className="flex items-center space-x-4 mb-6">
                         <div className="flex items-center border rounded">
