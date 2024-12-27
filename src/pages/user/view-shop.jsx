@@ -162,7 +162,7 @@ const ProductsTable = ({
                         overflow: "hidden",
                       }}
                     >
-                      {index + 1}
+                      {(page - 1) * 10 + index + 1}
                     </TableCell>
                   </Tooltip>
                   <Tooltip title={product.name} arrow>
@@ -336,8 +336,7 @@ const ImageUpload = ({ onUpload, onFileNameChange, user, url }) => {
           throw new Error("Failed to upload images. Please try again.");
         }
 
-        const result = await response.json();
-        console.log("Upload result:", result);
+        const result = await response.json(); 
 
         const ids = result.data.map((item) => item.id);
         onUpload(ids);
@@ -520,8 +519,7 @@ const AddEditProductDialog = ({
       )
         .then((response) => response.json())
         .then((response) => response.data);
-        const newId =response.id
-        console.log(newId) 
+        const newId =response.id 
         if (!shop) return null; 
         try {
         const response2 = await fetch(
@@ -536,8 +534,7 @@ const AddEditProductDialog = ({
           }
         )
           .then((response) => response.json())  
-          .then((response) => response.data);   
-          console.log(response2.product) 
+          .then((response) => response.data);    
           setProducts((prev) => {
             return prev.map((product) => { 
               const updatedProduct = response2.products.find((p) => p.id === newId); 
@@ -863,8 +860,7 @@ const ViewShopDialog = ({ open, handleClose, user, shop, handleOpen }) => {
         throw new Error("Failed to update shop details.");
       }
 
-      const updateResult = await updateResponse.json();
-      console.log("Shop update result:", updateResult);
+      const updateResult = await updateResponse.json(); 
 
       // Fetch shop details by ID
       const shopResponse = await fetch(
@@ -884,8 +880,7 @@ const ViewShopDialog = ({ open, handleClose, user, shop, handleOpen }) => {
       }
 
       const shopResult = await shopResponse.json();
-      const newshop = shopResult.data;
-      console.log("Fetched shop details:", shop);
+      const newshop = shopResult.data; 
 
       // Update Redux store
       dispatch(setShop(newshop));
@@ -1353,14 +1348,14 @@ const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
 );
 const Pagination = ({ totalPage, pageCount, setPageCount }) => {
   const getPageNumbers = () => {
-    const maxVisible = 5; // Max visible page numbers
+    const maxVisible = 5;  
     const numbers = [];
     if (totalPage <= maxVisible) {
-      // Show all pages if total is less than or equal to maxVisible
+     
       for (let i = 1; i <= totalPage; i++) numbers.push(i);
     } else {
       if (pageCount <= 3) {
-        numbers.push(1, 2, 3, 4, 5, "..."); // First 5 pages
+        numbers.push(1, "...");  
       } else if (pageCount >= totalPage - 2) {
         numbers.push("...", totalPage - 4, totalPage - 3, totalPage - 2, totalPage - 1, totalPage); // Last pages
       } else {
@@ -1422,8 +1417,7 @@ const Pagination = ({ totalPage, pageCount, setPageCount }) => {
  
 export default function ViewYourShop() {
   const { user } = useSelector((state) => state.auth);
-  const { shop } = useSelector((state) => state.shop);
-  console.log(shop);
+  const { shop } = useSelector((state) => state.shop); 
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
@@ -1664,8 +1658,7 @@ export default function ViewYourShop() {
       setOnFetch(false);  
     });  
     } 
-  }, [pageCount, fetchPage, shop, totalPage,]);
-    console.log(products)
+  }, [pageCount, fetchPage, shop, totalPage,]); 
   if (!shop) return null;
   if (shop.is_verified === false)
     return (
@@ -1673,9 +1666,7 @@ export default function ViewYourShop() {
         isNonMobileScreens={isNonMobileScreens}
         navigate={navigate}
       ></WaitApprovrMessege>
-    );
-    console.log(fetchPage)    
-  console.log(totalPage)   
+    );  
   return (
     <Box
       display="flex"
