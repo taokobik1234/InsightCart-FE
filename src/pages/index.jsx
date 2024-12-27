@@ -158,13 +158,6 @@ function HomeScreen() {
                             alt="Ultra allow - Fund 5"
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute bottom-8 left-8">
-                            <h1 className="text-4xl font-bold mb-2 text-white">Ultra allow - Fund</h1>
-                            <p className="text-lg text-white">
-
-
-                            </p>
-                        </div>
                     </div>
 
                     {/* Right Side - Content */}
