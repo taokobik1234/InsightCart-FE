@@ -58,7 +58,7 @@ export default function Category() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://tancatest.me/api/v1/admin', {
+                const response = await fetch('http://tancatest.me/api/v1/categories', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
