@@ -166,15 +166,17 @@ export default function CheckoutPage() {
 
         try {
             const orderData = {
-                checkout_id: checkoutData.items[0].checkout_id,
+                checkout_id: checkoutData.checkout_id,
                 address_id: selectedAddress,
                 payment_method: paymentMethod
             };
 
-            const response = await fetch('http://tancatest.me/api/v1/orders', {
+            const response = await fetch('http://tancatest.me/api/v1/order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
                     'session-id': userAuth.session_id,
                     'Authorization': `Bearer ${userAuth.token.AccessToken}`,
                     'x-client-id': userAuth.id
@@ -184,16 +186,23 @@ export default function CheckoutPage() {
 
             const data = await response.json();
             
-            if (data.message === 'Success') {
+            if (data.error_code === 0) { 
+                console.log(data);
                 showMessage('success', 'Order placed successfully!');
                 
-                if (paymentMethod === 'card') {
-                    window.location.href = data.data.payment_url;
-                } else {
-                    setTimeout(() => {
-                        navigate('/orders');
-                    }, 2000);
-                }
+                navigate('/order-success', {
+                    state: {
+                        orderData: {
+                            order_id: data.data.order_id,
+                            payment_method: paymentMethod
+                        },
+                        checkoutData: {
+                            total_price: checkoutData.total_price,
+                            items: checkoutData.items
+                        },
+                        selectedAddress: defaultAddress
+                    }
+                });
             } else {
                 showMessage('error', data.message || 'Failed to place order');
             }

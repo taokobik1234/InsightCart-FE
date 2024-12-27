@@ -29,6 +29,7 @@ import ProductList from "./pages/product/productList";
 import ProductDetailPage from "./pages/product/productDetail";
 import CartScreen from "./pages/product/cart";
 import CheckoutPage from "./pages/product/checkout";
+import OrderSuccessPage from "./pages/product/order-success";
 
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
@@ -70,6 +71,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/cart" element={<CartScreen />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-success" element={<OrderSuccessPage />} />
             <Route path="/products/:categoryId" element={<ProductList />} />
             <Route
               path="/products/details/:productId"
