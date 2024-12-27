@@ -980,7 +980,7 @@ export default function ViewYourShop() {
   };
 
   if (!shop) return null;
-  if (shop.is_verified === true)
+  if (shop.is_verified === false)
     return (
       <WaitApprovrMessege
         isNonMobileScreens={isNonMobileScreens}
