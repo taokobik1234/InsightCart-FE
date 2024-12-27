@@ -208,9 +208,7 @@ export default function ProductDetailPage() {
                     </div>
                     <h2 className="text-3xl font-bold mb-2">${productDetail.price}</h2>
                     <p className="text-gray-600 mb-4">
-                        PlayStation 5 Controller Skin High quality vinyl with air channel
-                        adhesive for easy bubble free install & mess free removal Pressure
-                        sensitive.
+                        {productDetail.description || "No description available"}
                     </p>
 
                     {/* Quantity and Buy */}
@@ -348,22 +346,7 @@ export default function ProductDetailPage() {
                     {activeTab === "description" && (
                         <div>
                             <p className="text-gray-700 leading-relaxed">
-                                Quisque varius diam vel metus mattis, id aliquam diam rhoncus.
-                                Proin vitae magna in dui finibus malesuada et at nulla. Morbi elit
-                                ex, viverra vitae ante vel, blandit feugiat ligula. Fusce fermentum
-                                iaculis nibh, at sodales leo maximus a. Nullam ultricies sodales
-                                nunc, in pellentesque lorem mattis quis. Cras imperdiet est in nunc
-                                tristique lacinia. Nullam aliquam mauris eu accumsan tincidunt.
-                                Suspendisse velit ex, aliquet vel ornare vel, dignissim a tortor.
-                            </p>
-                            <p className="text-gray-700 mt-4 leading-relaxed">
-                                Morbi ut sapien vitae odio accumsan gravida. Morbi vitae erat
-                                auctor, eleifend nunc a, lobortis neque. Praesent aliquam dignissim
-                                viverra. Maecenas lacus odio, feugiat eu nunc sit amet, maximus
-                                sagittis dolor. Vivamus nisi sapien, elementum sit amet eros sit
-                                amet, ultricies cursus ipsum. Sed consequat luctus ligula.
-                                Curabitur laoreet rhoncus blandit. Aenean vel diam ut arcu pharetra
-                                dignissim ut sed leo.
+                                {productDetail.description || "No description available"}
                             </p>
                         </div>
                     )}
