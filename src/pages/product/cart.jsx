@@ -12,6 +12,7 @@ export default function CartScreen() {
     const [message, setMessage] = useState({ type: "", message: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [isPageLoading, setIsPageLoading] = useState(true);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,7 +29,6 @@ export default function CartScreen() {
                 });
                 const data = await response.json();
                 setCartData(data.data.item || []);
-                calculateSubtotal(data.data.item || []);
             } catch (error) {
                 console.error("Error fetching cart data:", error);
             } finally {
@@ -39,16 +39,31 @@ export default function CartScreen() {
         fetchCartData();
     }, []);
 
-    const calculateSubtotal = (items) => {
+    const calculateSubtotal = (selectedProducts) => {
         let total = 0;
-        items.forEach((shop) => {
-            shop.item.forEach((product) => {
-                total += product.quantity * product.price;
-            });
+        selectedProducts.forEach((product) => {
+            total += product.quantity * product.price;
         });
-        setSubtotal(total.toFixed(2));
+        setSubtotal(total.toFixed(2)); // Update the subtotal state
     };
 
+    const toggleProductSelection = (product) => {
+        setSelectedProducts((prevSelected) => {
+            const isSelected = prevSelected.some((p) => p.product_id === product.product_id);
+
+            if (isSelected) {
+                // Remove the product if it's already selected
+                return prevSelected.filter((p) => p.product_id !== product.product_id);
+            } else {
+                // Add the product if it's not selected
+                return [...prevSelected, product];
+            }
+        });
+        console.log(selectedProducts);
+    };
+    useEffect(() => {
+        calculateSubtotal(selectedProducts);
+    }, [selectedProducts]);
     const updateCartAPI = async (updatedCart) => {
         try {
             const items = updatedCart.flatMap((shop) =>
@@ -90,7 +105,7 @@ export default function CartScreen() {
         const updatedCartData = [...cartData];
         updatedCartData[shopIndex].item[productIndex].quantity = newQuantity;
         setCartData(updatedCartData);
-        calculateSubtotal(updatedCartData);
+
 
         // Trigger debounced API call
         debouncedUpdateCartAPI(updatedCartData);
@@ -100,18 +115,20 @@ export default function CartScreen() {
         const updatedCartData = [...cartData];
         updatedCartData[shopIndex].item.splice(productIndex, 1);
         setCartData(updatedCartData);
-        calculateSubtotal(updatedCartData);
 
         // Trigger debounced API call
         debouncedUpdateCartAPI(updatedCartData);
     };
 
     const handleCheckout = async () => {
+        if (selectedProducts.length === 0) {
+            setMessage({ type: "error", message: "Please select at least one product to checkout" });
+            setTimeout(() => setMessage({ type: "", message: "" }), 3000);
+            return;
+        }
         setIsLoading(true);
         try {
-            const productIds = cartData.flatMap(shop => 
-                shop.item.map(product => product.product_id)
-            );
+            const productIds = selectedProducts.map(product => product.product_id);
 
             const response = await fetch("http://tancatest.me/api/v1/order/checkout", {
                 method: "POST",
@@ -128,14 +145,14 @@ export default function CartScreen() {
             });
 
             const data = await response.json();
-            
+
             if (response.ok && data.message === "Success") {
                 // Navigate to checkout page with order data
-                navigate('/checkout', { 
-                    state: { 
+                navigate('/checkout', {
+                    state: {
                         checkoutData: data.data,
-                        cartData: cartData
-                    } 
+                        cartData: selectedProducts
+                    }
                 });
             } else {
                 setMessage({ type: "error", message: data.message || "Checkout failed" });
@@ -161,9 +178,8 @@ export default function CartScreen() {
     return (
         <div className="min-h-screen pt-10 mx-auto px-10 bg-gray-100">
             {message.message && (
-                <div className={`fixed top-5 right-5 p-4 rounded-md ${
-                    message.type === "success" ? "bg-green-500" : "bg-red-500"
-                } text-white`}>
+                <div className={`fixed top-5 right-5 p-4 rounded-md ${message.type === "success" ? "bg-green-500" : "bg-red-500"
+                    } text-white`}>
                     {message.message}
                 </div>
             )}
@@ -195,6 +211,7 @@ export default function CartScreen() {
                                     <table className="w-full border-collapse">
                                         <thead>
                                             <tr className="text-left bg-white">
+                                                <th className="p-3">Select</th>
                                                 <th className="p-3">Product</th>
                                                 <th className="p-3">Unit Price</th>
                                                 <th className="p-3">Quantity</th>
@@ -205,6 +222,15 @@ export default function CartScreen() {
                                         <tbody>
                                             {shop.item.map((product, productIndex) => (
                                                 <tr key={product.product_id} className="border-b">
+                                                    <td className="p-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedProducts.some((p) => p.product_id === product.product_id)}
+                                                            onChange={() =>
+                                                                toggleProductSelection(product)
+                                                            }
+                                                        />
+                                                    </td>
                                                     <td className="p-3 flex items-center gap-3">
                                                         <img
                                                             src={
@@ -266,7 +292,7 @@ export default function CartScreen() {
                                 <span>Total:</span>
                                 <span>${subtotal}</span>
                             </div>
-                            <button 
+                            <button
                                 className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 relative"
                                 onClick={handleCheckout}
                                 disabled={isLoading}

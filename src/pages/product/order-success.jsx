@@ -116,7 +116,7 @@ export default function OrderSuccessPage() {
 
                 <div className="text-center space-x-4">
                     <button
-                        onClick={() => navigate('/orders')}
+                        onClick={() => navigate('/user/order-history')}
                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                     >
                         View My Orders
