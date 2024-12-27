@@ -31,6 +31,7 @@ import ProductDetailPage from "./pages/product/productDetail";
 import CartScreen from "./pages/product/cart";
 import CheckoutPage from "./pages/product/checkout";
 import OrderSuccessPage from "./pages/product/order-success";
+import OrderHistory from "./pages/user/order-history";
 
 function App() {
   const persistAuth = localStorage.getItem("persist:root");
@@ -56,6 +57,7 @@ function App() {
               <Route path="create-shop" element={<CreateShop />} />
               <Route path="view-shop" element={<ViewYourShop />} />
               <Route path="notification" element={<Notification />} />
+              <Route path="order-history" element={<OrderHistory />} />
             </Route>
             <Route path="/auth" element={<AuthLayout />}>
               <Route path="sign-in" element={<LoginScreen />} />

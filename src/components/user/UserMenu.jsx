@@ -112,6 +112,14 @@ export default function UserMenu() {
         >
           {shop ? "Seller panel" :"Create shop"}
         </MenuItem>
+        <MenuItem
+          onClick={() => {
+            navigate('/user/order-history');
+            handleClose()
+          }}
+        >
+          Order History
+        </MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
