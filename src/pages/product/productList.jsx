@@ -9,7 +9,7 @@ export default function ProductList() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [limit] = useState(10);
+    const [limit] = useState(12);
     const [totalPages, setTotalPages] = useState(5);
 
     // Fetch products
