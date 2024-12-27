@@ -58,6 +58,7 @@ const VouchersTable = ({ vouchers }) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
+ 
                         {vouchers &&
                             vouchers
                                 .filter((voucher) => voucher) // Filter out undefined or null values
@@ -71,7 +72,7 @@ const VouchersTable = ({ vouchers }) => {
                                         </Tooltip>
                                         <Tooltip
                                             title={`${voucher.discount_amount || 0}%`}
-                                            arrow
+                                            arrow 
                                         >
                                             <TableCell align="center">
                                                 {voucher.discount_amount || "N/A"}

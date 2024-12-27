@@ -81,6 +81,7 @@ const ProductsTable = ({
   setEdit,
   setEditProductId,
   setEditProduct,
+  page
 }) => {
   const [openDelete, setopenDelete] = useState(false);
   const [id, setId] = useState(null);
@@ -101,8 +102,7 @@ const ProductsTable = ({
         .then((res) => res.data);
       setProducts((prevProducts) =>
         prevProducts.filter((product) => product.id !== id)
-      );
-
+      ); 
       setopenDelete(false);
     } catch (error) {
       console.error(error);
@@ -152,9 +152,9 @@ const ProductsTable = ({
           <TableBody>
             {!products
               ? null
-              : products.map((product, index) => (
+              : products.slice(( page-1 )* 10 , page * 10   ).map((product, index) => (
                 <TableRow key={product.id}>
-                  <Tooltip title={index + 1} arrow>
+                  <Tooltip title={product?.id} arrow>
                     <TableCell
                       align="center"
                       sx={{
@@ -411,7 +411,7 @@ const AddEditProductDialog = ({
   product_id,
   setProducts,
   shop,
-  product,
+  product,setTotalpage,page
 }) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
@@ -424,7 +424,7 @@ const AddEditProductDialog = ({
     stock_level: 1,
   });
   const [message, setMessage] = useState({ type: "", message: "" });
-
+  const [waitting, setWaitting] = useState(false);
   useEffect(() => {
     if (product) {
       setSelectedFileName("");
@@ -433,8 +433,8 @@ const AddEditProductDialog = ({
         media_ids: product?.avatar?.map((item) => item.media_id) || "",
         name: product?.name || "",
         price: product?.price || "",
-        reorder_level: 1,
-        reorder_quantity: 1,
+        reorder_level: product?.inventory_object?.reorder_level || 1,
+        reorder_quantity: product?.inventory_object?.reorder_quantity || 1,
         stock_level: product?.inventory_object?.stock_level || 1,
       });
     }
@@ -451,6 +451,7 @@ const AddEditProductDialog = ({
   };
 
   const handleSubmit = () => {
+    setWaitting(true) 
     const requiredFields = [
       "media_ids",
       "category_ids",
@@ -519,8 +520,39 @@ const AddEditProductDialog = ({
       )
         .then((response) => response.json())
         .then((response) => response.data);
-
-      fetchProduct();
+        const newId =response.id
+        console.log(newId) 
+        if (!shop) return null; 
+        try {
+        const response2 = await fetch(
+          `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}&page=${page}&limit=10`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "session-id": user.session_id,
+              Authorization: `Bearer ${user.token.AccessToken}`,
+              "x-client-id": user.id,
+            },
+          }
+        )
+          .then((response) => response.json())  
+          .then((response) => response.data);   
+          console.log(response2.product) 
+          setProducts((prev) => {
+            return prev.map((product) => { 
+              const updatedProduct = response2.products.find((p) => p.id === newId); 
+              return product.id === newId ? { ...product, ...updatedProduct } : product;
+            });
+          });
+          
+          
+          
+      } catch (error) {
+        console.log(error);
+      }   
+      setWaitting(false) 
+      handleClose()  
+      
     } catch (error) {
       console.log(error);
     }
@@ -551,142 +583,155 @@ const AddEditProductDialog = ({
       )
         .then((response) => response.json())
         .then((response) => response.data);
-
-      fetchProduct();
+        const newId = response.ID
+        if (!shop) return null; 
+        try {
+        const response2 = await fetch(
+          `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}&page=1&limit=10`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "session-id": user.session_id,
+              Authorization: `Bearer ${user.token.AccessToken}`,
+              "x-client-id": user.id,
+            },
+          }
+        )
+          .then((response) => response.json())  
+          .then((response) => response.data);  
+          setTotalpage(response2.meta.total_pages) 
+          setProducts((prev) => { 
+            const newProduct = response2.products.find(product => product.id === newId);
+           
+            return newProduct ? [newProduct, ...prev] : prev;
+          });
+      } catch (error) {
+        console.log(error);
+      } 
+        setWaitting(false)
+        handleClose(); 
+     
     } catch (error) {
       console.log(error);
     }
+     
   };
 
-  const fetchProduct = async () => {
-    if (!shop) return null;
-    try {
-      const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "session-id": user.session_id,
-            Authorization: `Bearer ${user.token.AccessToken}`,
-            "x-client-id": user.id,
-          },
-        }
-      )
-        .then((response) => response.json())
-        .then((response) => response.data);
-      setProducts(response.products);
-      handleClose();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+   
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle> {title}</DialogTitle>
+     {waitting ? (
+          <DotLoader />
+            ) : (
+              <> 
+       <DialogTitle> {title}</DialogTitle>
       <DialogContent>
-        {message.message && (
-          <Box
-            sx={{
-              position: "fixed",
-              top: "100px",
-              right: "20px",
-              zIndex: 1000, // Ensures it is above other components
-              minWidth: "250px",
-            }}
-          >
-            <Alert severity={message.type} variant="filled">
-              {message.message}
-            </Alert>
-          </Box>
-        )}
-        <Grid container spacing={3}>
-          <Grid item xs={8}>
-            <Box
-              component="form"
-              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-            >
-              <TextField
-                select
-                label="Category"
-                name="category_ids"
-                value={formData.category_ids}
-                onChange={handleChange}
-                sx={{ mt: 2 }}
+       
+            {message.message && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: "100px",
+                  right: "20px",
+                  zIndex: 1000, // Ensures it is above other components
+                  minWidth: "250px",
+                }}
               >
-                {categories.map((category) => (
-                  <MenuItem key={category.id} value={category.id}>
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </TextField>
+                <Alert severity={message.type} variant="filled">
+                  {message.message}
+                </Alert>
+              </Box>
+            )}
+            <Grid container spacing={3}>
+              <Grid item xs={8}>
+                <Box
+                  component="form"
+                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
+                  <TextField
+                    select
+                    label="Category"
+                    name="category_ids"
+                    value={formData.category_ids}
+                    onChange={handleChange}
+                    sx={{ mt: 2 }}
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={category.id}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
 
-              <TextField
-                label="Selected File Name  "
-                name="media_ids"
-                value={selectedFileName}
-                onChange={handleChange}
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
+                  <TextField
+                    label="Selected File Name  "
+                    name="media_ids"
+                    value={selectedFileName}
+                    onChange={handleChange}
+                    fullWidth
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
 
-              <TextField
-                label="Product Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                label="Price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                fullWidth
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">₫</InputAdornment>
-                  ),
-                }}
-              />
-              <TextField
-                label="Reorder Level"
-                name="reorder_level"
-                type="number"
-                value={formData.reorder_level}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                label="Reorder Quantity"
-                name="reorder_quantity"
-                type="number"
-                value={formData.reorder_quantity}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                label="Stock Level"
-                name="stock_level"
-                type="number"
-                value={formData.stock_level}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4} sx={{ display: "flex", justifyContent: "center" }}>
-            <ImageUpload
-              onUpload={(mediaId) =>
-                handleChange({ target: { name: "media_ids", value: mediaId } })
-              }
-              onFileNameChange={(fileName) => setSelectedFileName(fileName)}
-              user={user}
-              url={product?.avatar?.map((item) => item.url) || null}
-            />
-          </Grid>
-        </Grid>
+                  <TextField
+                    label="Product Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">₫</InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="Reorder Level"
+                    name="reorder_level"
+                    type="number"
+                    value={formData.reorder_level}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Reorder Quantity"
+                    name="reorder_quantity"
+                    type="number"
+                    value={formData.reorder_quantity}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Stock Level"
+                    name="stock_level"
+                    type="number"
+                    value={formData.stock_level}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={4} sx={{ display: "flex", justifyContent: "center" }}>
+                <ImageUpload
+                  onUpload={(mediaId) =>
+                    handleChange({ target: { name: "media_ids", value: mediaId } })
+                  }
+                  onFileNameChange={(fileName) => setSelectedFileName(fileName)}
+                  user={user}
+                  url={product?.avatar?.map((item) => item.url) || null}
+                />
+              </Grid>
+            </Grid>
+            
+          
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
@@ -696,6 +741,8 @@ const AddEditProductDialog = ({
           Submit
         </Button>
       </DialogActions>
+      </> 
+      )} 
     </Dialog>
   );
 };
@@ -1304,6 +1351,75 @@ const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
     </Box>
   </Box>
 );
+const Pagination = ({ totalPage, pageCount, setPageCount }) => {
+  const getPageNumbers = () => {
+    const maxVisible = 5; // Max visible page numbers
+    const numbers = [];
+    if (totalPage <= maxVisible) {
+      // Show all pages if total is less than or equal to maxVisible
+      for (let i = 1; i <= totalPage; i++) numbers.push(i);
+    } else {
+      if (pageCount <= 3) {
+        numbers.push(1, 2, 3, 4, 5, "..."); // First 5 pages
+      } else if (pageCount >= totalPage - 2) {
+        numbers.push("...", totalPage - 4, totalPage - 3, totalPage - 2, totalPage - 1, totalPage); // Last pages
+      } else {
+        numbers.push("...", pageCount - 2, pageCount - 1, pageCount, pageCount + 1, pageCount + 2, "..."); // Centered around current page
+      }
+    }
+    return numbers;
+  };
+
+  return (
+    <Box display="flex" justifyContent="center" alignItems="center" mt={2}> 
+      <Button
+        variant="outlined"
+        onClick={() => setPageCount((prev) => Math.max(prev - 1, 1))}
+        disabled={pageCount === 1}
+        sx={{
+          minWidth: "36px",
+          height: "36px",
+          marginX: "4px",
+        }}
+      >
+        {"<"}
+      </Button>
+
+      {/* Page Numbers */}
+      {getPageNumbers().map((number, index) => (
+        <Button
+          key={index}
+          variant={number === pageCount ? "contained" : "outlined"}
+          onClick={() => typeof number === "number" && setPageCount(number)}
+          disabled={number === "..." || number === pageCount}
+          sx={{
+            minWidth: "36px",
+            height: "36px",
+            marginX: "4px",
+          }}
+        >
+          {number}
+        </Button>
+      ))}
+
+      {/* Next Button */}
+      <Button
+        variant="outlined"
+        onClick={() => setPageCount((prev) => Math.min(prev + 1, totalPage))}
+        disabled={pageCount === totalPage}
+        sx={{
+          minWidth: "36px",
+          height: "36px",
+          marginX: "4px",
+        }}
+      >
+        {">"}
+      </Button>
+    </Box>
+  );
+};
+
+ 
 export default function ViewYourShop() {
   const { user } = useSelector((state) => state.auth);
   const { shop } = useSelector((state) => state.shop);
@@ -1311,7 +1427,7 @@ export default function ViewYourShop() {
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
-  const [products, setproducts] = useState([]);
+  const [products, setproducts] = useState(undefined);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -1319,12 +1435,12 @@ export default function ViewYourShop() {
   const [editProductId, setEditProductId] = useState();
   const [activeTab, setActiveTab] = useState(0);
   const [isVoucherDialogOpen, setVoucherDialogOpen] = useState(false);
-  const [vouchers, setVouchers] = useState([]);
+  const [vouchers, setVouchers] = useState([]); 
   const [orders, setOrders] = useState([]);
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("pending");
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState({});
-
+  const [onFetch,setOnFetch] = useState(true);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
@@ -1420,7 +1536,10 @@ export default function ViewYourShop() {
     // If not a local update, fetch fresh data
     await fetchOrders(selectedOrderStatus);
   };
-
+ 
+  const [pageCount,setPageCount] = useState(0);
+  const [totalPage,setTotalpage] = useState();
+  const [fetchPage,setFetchpage] = useState(1);  
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     // Fetch orders when Orders tab (index 2) is selected
@@ -1445,11 +1564,11 @@ export default function ViewYourShop() {
   };
 
   const fetchProduct = async () => {
-    if (!shop) return null;
-    console.log(shop.id);
+    setOnFetch(true) 
+    if (!shop) return null; 
     try {
       const response = await fetch(
-        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}  `,
+        `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}&page=1&limit=10`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1460,16 +1579,16 @@ export default function ViewYourShop() {
         }
       )
         .then((response) => response.json())
-        .then((response) => response.data);
-
-      console.log("Content-Type", response.products);
-      setproducts(response.products);
+        .then((response) => response.data); 
+      setproducts(response.products); 
+      setTotalpage(response.meta.total_pages) 
       setOpen(false);
+      setPageCount(1)
+      setOnFetch(false)  
     } catch (error) {
       console.log(error);
     }
-  };
-
+  }; 
   const fetchVoucher = async () => {
     if (!shop) return null;
     try {
@@ -1497,9 +1616,56 @@ export default function ViewYourShop() {
     fetchCategories();
     fetchProduct();
     fetchVoucher();
-    fetchOrders();
+     fetchOrders();
   }, [shop, setVouchers]);
-
+ 
+  useEffect(() => {
+    if(onFetch) return
+    setOnFetch(true) 
+    const fetchProduct2 = async (page) => {
+      if (!shop) return null; 
+      try {
+        const response = await fetch(
+          `http://tancatest.me/api/v1/shops/products?shop_id=${shop.id}&page=${page}&limit=10`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "session-id": user.session_id,
+              Authorization: `Bearer ${user.token.AccessToken}`,
+              "x-client-id": user.id,
+            },
+          }
+        )
+          .then((response) => response.json())
+          .then((response) => response.data);
+  
+        setproducts((prev) => [...prev, ...response.products]); // Append products to the previous ones
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    const fetchNextPages = async () => {
+      const totalPagesToFetch = Math.min(4, totalPage - fetchPage); // Ensure not fetching more than available pages
+      for (let i = 1; i <= totalPagesToFetch; i++) {
+        await fetchProduct2(fetchPage + i);
+        setFetchpage((prev) => prev + 1);
+  
+      }
+    };
+  
+    if (pageCount > 0 && fetchPage <= pageCount) {
+      fetchNextPages()
+      .then(() => {
+      setOnFetch(false);  
+    })
+    .catch((error) => {
+      console.error("Error fetching pages:", error);  
+      setOnFetch(false);  
+    });  
+    } 
+  }, [pageCount, fetchPage, shop, totalPage,]);
+    console.log(products)
   if (!shop) return null;
   if (shop.is_verified === false)
     return (
@@ -1508,6 +1674,8 @@ export default function ViewYourShop() {
         navigate={navigate}
       ></WaitApprovrMessege>
     );
+    console.log(fetchPage)    
+  console.log(totalPage)   
   return (
     <Box
       display="flex"
@@ -1538,10 +1706,11 @@ export default function ViewYourShop() {
             button1={"Shop Details"}
             button2={"Add Product"}
           />
-          {products?.length === 0 ? (
+          {products === undefined ?(
             <DotLoader></DotLoader>
           ) : (
             <ProductsTable
+              page ={pageCount}
               products={products}
               setProducts={setproducts}
               user={user}
@@ -1551,9 +1720,12 @@ export default function ViewYourShop() {
               setEditProductId={setEditProductId}
             ></ProductsTable>
           )}
-
+       
+            <Pagination pageCount={pageCount} setPageCount={setPageCount} totalPage={totalPage}></Pagination>
+      
           <AddEditProductDialog
             open={open}
+            setTotalpage ={setTotalpage}
             title="Add Product"
             handleClose={() => setOpen(false)}
             categories={categories}
@@ -1563,6 +1735,7 @@ export default function ViewYourShop() {
           />
           <AddEditProductDialog
             open={edit}
+            page={pageCount} 
             product={editProduct}
             product_id={editProductId}
             title="Edit Product"
