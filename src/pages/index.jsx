@@ -10,8 +10,30 @@ import { fetchRecommendedProducts, setCurrentPage } from "../store/productslice"
 function HomeScreen() {
     const [categories, setCategories] = useState([]);
     const { items: allProducts, loading, recommendedProducts, loadingMore, hasMore, currentPage } = useSelector(state => state.products);
+    const [randomizedProducts, setRandomizedProducts] = useState([]);
     const dispatch = useDispatch();
     const location = useLocation();
+
+    // Shuffle array function using Fisher-Yates algorithm
+    const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
+
+    // Randomize products only when returning to home or initial API call
+    useEffect(() => {
+        if (recommendedProducts.length > 0 && currentPage === 1) {
+            setRandomizedProducts(shuffleArray(recommendedProducts));
+        } else if (recommendedProducts.length > 0 && currentPage > 1) {
+            // Append new products without shuffling when loading more
+            setRandomizedProducts(prev => [...prev, ...recommendedProducts.slice(prev.length)]);
+        }
+    }, [recommendedProducts, currentPage]);
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [location]);
@@ -187,7 +209,7 @@ function HomeScreen() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
-                            {recommendedProducts.map((product) => (
+                            {randomizedProducts.map((product) => (
                                 <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                                     <NavLink to={`/products/details/${product.id}`}>
                                         <div className="relative h-48">

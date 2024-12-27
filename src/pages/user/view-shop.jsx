@@ -21,6 +21,9 @@ import {
   MenuItem,
   InputAdornment,
   Grid,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import AddEditVoucherDialog from "../../components/products/AddVoucherDialog";
@@ -1151,6 +1154,111 @@ const MapComponent = ({ setFieldValue, userInput }) => {
   );
 };
 
+const OrdersTable = ({ orders, user, updateOrderStatus }) => {
+  const [selectedStatus, setSelectedStatus] = useState({});
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    setSelectedStatus(prev => ({ ...prev, [orderId]: newStatus }));
+    updateOrderStatus(orderId, newStatus);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  return (
+    <TableContainer component={Card} sx={{ width: "100%" }}>
+      <Table sx={{ tableLayout: "fixed" }}>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "#1976d2" }}>
+            {[
+              { label: "Order ID", width: "15%" },
+              { label: "Customer Name", width: "10%" },
+              { label: "Customer Email", width: "25%" },
+              { label: "Products", width: "20%" },
+              { label: "Total Amount", width: "10%" },
+              { label: "Created At", width: "10%" },
+              { label: "Status", width: "5%" },
+              { label: "Action", width: "5%" },
+            ].map((column) => (
+              <TableCell
+                key={column.label}
+                align="center"
+                sx={{
+                  fontWeight: "bold",
+                  color: "white",
+                  fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                  padding: { xs: "4px", sm: "6px" },
+                  width: column.width,
+                }}
+              >
+                {column.label}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {orders?.map((order) => (
+            <TableRow key={order.order_id}>
+              <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                {order.order_id}
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                {order.user_name}
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "0.8rem", wordBreak: "break-word" }}>
+                {order.user_email}
+              </TableCell>
+              <TableCell align="left" sx={{ fontSize: "0.8rem" }}>
+                {order.products.map((product, index) => (
+                  <Box key={product.product_id} sx={{ mb: index !== order.products.length - 1 ? 1 : 0 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {product.product_name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Quantity: {product.quantity} x ${product.price}
+                    </Typography>
+                  </Box>
+                ))}
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                ${order.total_price}
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                {formatDate(order.created_at)}
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                {selectedStatus[order.order_id] || order.status}
+              </TableCell>
+              <TableCell align="center">
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={selectedStatus[order.order_id] || order.status}
+                    onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                    size="small"
+                  >
+                    <MenuItem value="pending">Pending</MenuItem>
+                    <MenuItem value="processing">Processing</MenuItem>
+                    <MenuItem value="shipping">Shipping</MenuItem>
+                    <MenuItem value="delivered">Delivered</MenuItem>
+                    <MenuItem value="canceled">Canceled</MenuItem>
+                  </Select>
+                </FormControl>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
 const WaitApprovrMessege = ({ isNonMobileScreens, navigate }) => (
   <Box
     display="flex"
@@ -1212,8 +1320,113 @@ export default function ViewYourShop() {
   const [activeTab, setActiveTab] = useState(0);
   const [isVoucherDialogOpen, setVoucherDialogOpen] = useState(false);
   const [vouchers, setVouchers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [selectedOrderStatus, setSelectedOrderStatus] = useState("pending");
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState({});
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    // Update UI immediately
+    setSelectedStatus(prev => ({ ...prev, [orderId]: newStatus }));
+    
+    // Make API call in background
+    try {
+      await fetch(
+        `http://tancatest.me/api/v1/order/shop/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      // Remove the order from the current list after successful status change
+      if (newStatus !== selectedOrderStatus) {
+        setOrders(prevOrders => prevOrders.filter(order => order.order_id !== orderId));
+      }
+      
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      // Revert UI if API call fails
+      setSelectedStatus(prev => {
+        const newState = { ...prev };
+        delete newState[orderId];
+        return newState;
+      });
+    }
+  };
+
+  const fetchOrders = async (status = selectedOrderStatus) => {
+    if (!shop) return null;
+    setIsLoadingOrders(true);
+    try {
+      const response = await fetch(
+        `http://tancatest.me/api/v1/order/shop?status=${status}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+
+      const data = await response.json();
+      console.log("Fetched orders:", data);
+      
+      const ordersList = data?.data || [];
+      setOrders(ordersList);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setOrders([]);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus, isLocalUpdate = false) => {
+    if (isLocalUpdate) {
+      // Update local state immediately
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.order_id === orderId 
+            ? { ...order, status: newStatus }
+            : order
+        )
+      );
+      return;
+    }
+
+    // If not a local update, fetch fresh data
+    await fetchOrders(selectedOrderStatus);
+  };
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+    // Fetch orders when Orders tab (index 2) is selected
+    if (newValue === 2) {
+      fetchOrders();
+    }
   };
   const fetchCategories = async () => {
     try {
@@ -1284,6 +1497,7 @@ export default function ViewYourShop() {
     fetchCategories();
     fetchProduct();
     fetchVoucher();
+    fetchOrders();
   }, [shop, setVouchers]);
 
   if (!shop) return null;
@@ -1312,6 +1526,7 @@ export default function ViewYourShop() {
         <Tabs value={activeTab} onChange={handleTabChange} centered>
           <Tab label="View Shop" />
           <Tab label="View Vouchers" />
+          <Tab label="Orders" />
         </Tabs>
       </Box>
       {activeTab === 0 && (
@@ -1391,6 +1606,195 @@ export default function ViewYourShop() {
             <VouchersTable vouchers={vouchers} />
           )
           }
+        </Box>
+      )}
+
+      {activeTab === 2 && (
+        <Box>
+          <Typography variant="h5" sx={{ mb: 3 }}>
+            Shop Orders
+          </Typography>
+          <Box 
+            display="flex" 
+            gap={1} 
+            mb={3}
+          >
+            {["pending", "processing", "shipping", "delivered", "canceled"].map((status) => (
+              <Button
+                key={status}
+                variant={selectedOrderStatus === status ? "contained" : "outlined"}
+                onClick={() => {
+                  setSelectedOrderStatus(status);
+                  setOrders([]); // Clear current orders to show loading state
+                  fetchOrders(status);
+                }}
+                sx={{
+                  textTransform: 'capitalize',
+                  borderRadius: '4px',
+                  px: 2,
+                  py: 0.5,
+                  fontSize: '0.9rem',
+                  backgroundColor: selectedOrderStatus === status ? '#1976d2' : 'transparent',
+                  borderColor: '#1976d2',
+                  color: selectedOrderStatus === status ? 'white' : '#1976d2',
+                  '&:hover': {
+                    backgroundColor: selectedOrderStatus === status ? '#1565c0' : 'rgba(25, 118, 210, 0.04)',
+                  },
+                }}
+              >
+                {status}
+              </Button>
+            ))}
+          </Box>
+          {isLoadingOrders ? (
+            <DotLoader />
+          ) : orders.length === 0 ? (
+            <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+              <Typography variant="h6" color="textSecondary">
+                No {selectedOrderStatus} orders found
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer component={Card} sx={{ width: "100%", boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#1976d2' }}>
+                    <TableCell sx={{ 
+                      width: '200px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      padding: '8px 16px',
+                    }}>Order ID</TableCell>
+                    <TableCell sx={{ 
+                      width: '120px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Customer Name</TableCell>
+                    <TableCell sx={{ 
+                      width: '200px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Customer Email</TableCell>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Products</TableCell>
+                    <TableCell sx={{ 
+                      width: '120px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Total Amount</TableCell>
+                    <TableCell sx={{ 
+                      width: '150px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Created At</TableCell>
+                    <TableCell sx={{ 
+                      width: '100px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Status</TableCell>
+                    <TableCell sx={{ 
+                      width: '120px', 
+                      color: 'white', 
+                      fontWeight: 600, 
+                      fontSize: '0.9rem',
+                      padding: '8px 16px',
+                    }}>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orders?.map((order) => (
+                    <TableRow key={order.order_id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        padding: '8px 16px',
+                      }}>{order.order_id}</TableCell>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        padding: '8px 16px',
+                      }}>{order.user_name}</TableCell>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        wordBreak: 'break-word',
+                        padding: '8px 16px',
+                      }}>{order.user_email}</TableCell>
+                      <TableCell sx={{ padding: '8px 16px' }}>
+                        {order.products.map((product, index) => (
+                          <Box key={product.product_id} sx={{ mb: index !== order.products.length - 1 ? 1 : 0 }}>
+                            <Typography sx={{ fontSize: '0.85rem', color: '#333', fontWeight: 500 }}>
+                              {product.product_name}
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.8rem', color: '#666' }}>
+                              Quantity: {product.quantity} × ${product.price}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </TableCell>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        padding: '8px 16px',
+                      }}>${order.total_price}</TableCell>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        padding: '8px 16px',
+                      }}>{formatDate(order.created_at)}</TableCell>
+                      <TableCell sx={{ 
+                        fontSize: '0.85rem', 
+                        color: '#333',
+                        padding: '8px 16px',
+                      }}>{selectedStatus[order.order_id] || order.status}</TableCell>
+                      <TableCell sx={{ padding: '8px 16px' }}>
+                        <Select
+                          value={selectedStatus[order.order_id] || order.status}
+                          onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                          size="small"
+                          fullWidth
+                          sx={{
+                            fontSize: '0.85rem',
+                            height: '32px',
+                            '.MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' },
+                          }}
+                        >
+                          <MenuItem value="pending">Pending</MenuItem>
+                          <MenuItem value="processing">Processing</MenuItem>
+                          <MenuItem value="shipping">Shipping</MenuItem>
+                          <MenuItem value="delivered">Delivered</MenuItem>
+                          <MenuItem value="canceled">Canceled</MenuItem>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </Box>
       )}
     </Box>
