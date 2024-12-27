@@ -24,6 +24,10 @@ export default function CheckoutPage() {
     const [message, setMessage] = useState({ type: '', message: '' });
     const [openDialog, setOpenDialog] = useState(false);
     const [openAddressListDialog, setOpenAddressListDialog] = useState(false);
+    const [openVoucherDialog, setOpenVoucherDialog] = useState(false);
+    const [vouchers, setVouchers] = useState([]);
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [voucherDiscount, setVoucherDiscount] = useState(0);
     const [addressInput, setAddressInput] = useState({
         street: '',
         district: '',
@@ -168,7 +172,8 @@ export default function CheckoutPage() {
             const orderData = {
                 checkout_id: checkoutData.checkout_id,
                 address_id: selectedAddress,
-                payment_method: paymentMethod
+                payment_method: paymentMethod,
+                ...(selectedVoucher && { voucher_id: selectedVoucher.id })
             };
 
             const response = await fetch('http://tancatest.me/api/v1/order', {
@@ -198,9 +203,12 @@ export default function CheckoutPage() {
                         },
                         checkoutData: {
                             total_price: checkoutData.total_price,
-                            items: checkoutData.items
+                            items: checkoutData.items,
+                            voucher_discount: voucherDiscount,
+                            final_price: checkoutData.total_price - voucherDiscount
                         },
-                        selectedAddress: defaultAddress
+                        selectedAddress: defaultAddress,
+                        voucher: selectedVoucher
                     }
                 });
             } else {
@@ -221,6 +229,59 @@ export default function CheckoutPage() {
         const selected = addresses.find(addr => addr.id === addressId);
         setDefaultAddress(selected);
         setOpenAddressListDialog(false);
+    };
+
+    const fetchVouchers = async () => {
+        try {
+            const response = await fetch('http://tancatest.me/api/v1/vouchers?page=1&limit=10', {
+                headers: {
+                    "Authorization": `Bearer ${userAuth.token.AccessToken}`,
+                    "x-client-id": userAuth.id,
+                    "session-id": userAuth.session_id,
+                    "Access-Control-Allow-Origin": "*",
+                    "accept": "application/json"
+                }
+            });
+            const data = await response.json();
+            if (data.error_code === 0) {
+                setVouchers(data.data.list || []);
+            }
+        } catch (error) {
+            console.error('Error fetching vouchers:', error);
+            showMessage('error', 'Failed to fetch vouchers');
+        }
+    };
+
+    const handleApplyVoucher = async (voucher) => {
+        try {
+            const response = await fetch('http://tancatest.me/api/v1/vouchers/apply', {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${userAuth.token.AccessToken}`,
+                    "x-client-id": userAuth.id,
+                    "session-id": userAuth.session_id,
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json",
+                    "accept": "application/json"
+                },
+                body: JSON.stringify({
+                    id: voucher.id,
+                    order_amount: checkoutData.total_price
+                })
+            });
+            const data = await response.json();
+            if (data.error_code === 0) {
+                setSelectedVoucher(data.data.voucher);
+                setVoucherDiscount(data.data.discount_amount || 0);
+                showMessage('success', 'Voucher applied successfully!');
+                setOpenVoucherDialog(false);
+            } else {
+                showMessage('error', data.message || 'Failed to apply voucher');
+            }
+        } catch (error) {
+            console.error('Error applying voucher:', error);
+            showMessage('error', 'Failed to apply voucher');
+        }
     };
 
     if (!checkoutData || !cartData) {
@@ -330,6 +391,31 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="lg:col-span-1">
+                        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold">Voucher</h2>
+                                <button 
+                                    onClick={() => {
+                                        setOpenVoucherDialog(true);
+                                        fetchVouchers();
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    disabled={isExpired}
+                                >
+                                    {selectedVoucher ? 'Change Voucher' : 'Apply Voucher'}
+                                </button>
+                            </div>
+                            
+                            {selectedVoucher && (
+                                <div className="p-4 border rounded-lg">
+                                    <p className="font-medium">{selectedVoucher.name}</p>
+                                    <p className="text-sm text-gray-500">
+                                        Discount: ${voucherDiscount}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="bg-white p-6 rounded-lg shadow-sm">
                             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                             
@@ -393,9 +479,15 @@ export default function CheckoutPage() {
                                     <span>Shipping</span>
                                     <span>Free</span>
                                 </div>
+                                {voucherDiscount > 0 && (
+                                    <div className="flex justify-between mb-2 text-green-600">
+                                        <span>Voucher Discount</span>
+                                        <span>-${voucherDiscount}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total</span>
-                                    <span>${checkoutData.total_price}</span>
+                                    <span>${(checkoutData.total_price - voucherDiscount).toFixed(2)}</span>
                                 </div>
                                 
                                 <button
@@ -528,6 +620,58 @@ export default function CheckoutPage() {
                     </Button>
                     <Button onClick={handleSaveAddress} variant="contained">
                         Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Voucher Dialog */}
+            <Dialog 
+                open={openVoucherDialog} 
+                onClose={() => setOpenVoucherDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Select Voucher</DialogTitle>
+                <DialogContent>
+                    <div className="space-y-4 mt-4">
+                        {Array.isArray(vouchers) && vouchers.map((voucher) => (
+                            <div
+                                key={voucher.id}
+                                className="p-4 border rounded-lg cursor-pointer hover:border-blue-500"
+                                onClick={() => handleApplyVoucher(voucher)}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <p className="font-medium">{voucher.name}</p>
+                                    <span className="text-sm font-semibold text-blue-600">
+                                        {voucher.code}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {voucher.description}
+                                </p>
+                                <div className="flex justify-between mt-2">
+                                    <span className="text-sm text-blue-600">
+                                        Discount: {voucher.discount_amount}
+                                        {voucher.discount_type === 'percent' ? '%' : '$'}
+                                        {voucher.max_discount_amount ? ` (Max: $${voucher.max_discount_amount})` : ''}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                        Min order: ${voucher.minimum_order_amount}
+                                    </span>
+                                </div>
+                                <div className="text-xs text-gray-400 mt-2">
+                                    Valid until: {new Date(voucher.valid_to).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ))}
+                        {(!Array.isArray(vouchers) || vouchers.length === 0) && (
+                            <p className="text-center text-gray-500">No vouchers available</p>
+                        )}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenVoucherDialog(false)}>
+                        Cancel
                     </Button>
                 </DialogActions>
             </Dialog>
