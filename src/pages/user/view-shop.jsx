@@ -24,6 +24,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Switch,
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import AddEditVoucherDialog from "../../components/products/AddVoucherDialog";
@@ -1424,6 +1425,11 @@ const Pagination = ({ totalPage, pageCount, setPageCount }) => {
 const ReportsSection = ({ user }) => {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPercentage, setShowPercentage] = useState({
+    viewed: false,
+    sold: false,
+    trend: false
+  });
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -1451,10 +1457,17 @@ const ReportsSection = ({ user }) => {
   if (loading) return <DotLoader />;
   if (!reportData) return <Typography>No report data available</Typography>;
 
+  const calculatePercentages = (data) => {
+    const total = data.reduce((sum, item) => sum + item, 0);
+    return data.map(value => ((value / total) * 100).toFixed(1));
+  };
+
   const mostViewedData = {
     labels: reportData.most_viewed_products.map(product => product.name),
     datasets: [{
-      data: reportData.most_viewed_products.map(product => product.viewed),
+      data: showPercentage.viewed 
+        ? calculatePercentages(reportData.most_viewed_products.map(product => product.viewed))
+        : reportData.most_viewed_products.map(product => product.viewed),
       backgroundColor: [
         '#FF6384',
         '#36A2EB',
@@ -1468,7 +1481,9 @@ const ReportsSection = ({ user }) => {
   const mostSoldData = {
     labels: reportData.most_sold_products.map(product => product.name),
     datasets: [{
-      data: reportData.most_sold_products.map(product => product.sold),
+      data: showPercentage.sold
+        ? calculatePercentages(reportData.most_sold_products.map(product => product.sold))
+        : reportData.most_sold_products.map(product => product.sold),
       backgroundColor: [
         '#FF6384',
         '#36A2EB',
@@ -1482,7 +1497,9 @@ const ReportsSection = ({ user }) => {
   const viewTrendData = {
     labels: reportData.most_view_trend.map(product => product.name),
     datasets: [{
-      data: reportData.most_view_trend.map(product => product.view_trend),
+      data: showPercentage.trend
+        ? calculatePercentages(reportData.most_view_trend.map(product => product.view_trend))
+        : reportData.most_view_trend.map(product => product.view_trend),
       backgroundColor: [
         '#FF6384',
         '#36A2EB',
@@ -1516,11 +1533,35 @@ const ReportsSection = ({ user }) => {
           size: 14
         },
         formatter: (value) => {
-          return value;
+          return showPercentage.viewed || showPercentage.sold || showPercentage.trend 
+            ? `${value}%` 
+            : value;
         }
       }
     }
   };
+
+  const ChartHeader = ({ title, type }) => (
+    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Typography variant="h6">{title}</Typography>
+      <Box display="flex" alignItems="center">
+        <Typography variant="body2" color="textSecondary" mr={1}>
+          Amount
+        </Typography>
+        <Switch
+          size="small"
+          checked={showPercentage[type]}
+          onChange={(e) => setShowPercentage(prev => ({
+            ...prev,
+            [type]: e.target.checked
+          }))}
+        />
+        <Typography variant="body2" color="textSecondary" ml={1}>
+          Percentage
+        </Typography>
+      </Box>
+    </Box>
+  );
 
   return (
     <Box>
@@ -1528,7 +1569,7 @@ const ReportsSection = ({ user }) => {
       <Grid container spacing={4}>
         <Grid item xs={12} md={4}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Most Viewed Products</Typography>
+            <ChartHeader title="Most Viewed Products" type="viewed" />
             <Box sx={{ height: 300 }}>
               <Pie data={mostViewedData} options={chartOptions} plugins={[ChartDataLabels]} />
             </Box>
@@ -1536,7 +1577,7 @@ const ReportsSection = ({ user }) => {
         </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Most Sold Products</Typography>
+            <ChartHeader title="Most Sold Products" type="sold" />
             <Box sx={{ height: 300 }}>
               <Pie data={mostSoldData} options={chartOptions} plugins={[ChartDataLabels]} />
             </Box>
@@ -1544,7 +1585,7 @@ const ReportsSection = ({ user }) => {
         </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>View Trend</Typography>
+            <ChartHeader title="View Trend" type="trend" />
             <Box sx={{ height: 300 }}>
               <Pie data={viewTrendData} options={chartOptions} plugins={[ChartDataLabels]} />
             </Box>
