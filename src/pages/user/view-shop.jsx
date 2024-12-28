@@ -43,6 +43,12 @@ import L from "leaflet";
 import DotLoader from "../../components/ui/DotLoader";
 import { updateSourceFile } from "typescript";
 import VouchersTable from "../../components/products/VouchersTable";
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Legend } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+ChartJS.register(ArcElement, Legend);
+
 const HeaderSection = ({ handleClickOpen, handleClickOpen2, title, button1, button2 }) => (
   <Box
     display="flex"
@@ -1414,7 +1420,141 @@ const Pagination = ({ totalPage, pageCount, setPageCount }) => {
   );
 };
 
- 
+// Add ReportsSection component
+const ReportsSection = ({ user }) => {
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch("http://tancatest.me/api/v1/shops/report", {
+          headers: {
+            "Content-Type": "application/json",
+            "session-id": user.session_id,
+            Authorization: `Bearer ${user.token.AccessToken}`,
+            "x-client-id": user.id,
+          },
+        });
+        const data = await response.json();
+        setReportData(data.data);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, [user]);
+
+  if (loading) return <DotLoader />;
+  if (!reportData) return <Typography>No report data available</Typography>;
+
+  const mostViewedData = {
+    labels: reportData.most_viewed_products.map(product => product.name),
+    datasets: [{
+      data: reportData.most_viewed_products.map(product => product.viewed),
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF'
+      ],
+    }]
+  };
+
+  const mostSoldData = {
+    labels: reportData.most_sold_products.map(product => product.name),
+    datasets: [{
+      data: reportData.most_sold_products.map(product => product.sold),
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF'
+      ],
+    }]
+  };
+
+  const viewTrendData = {
+    labels: reportData.most_view_trend.map(product => product.name),
+    datasets: [{
+      data: reportData.most_view_trend.map(product => product.view_trend),
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF',
+        '#FF9F40',
+        '#4DBECF',
+        '#949FB1',
+        '#FF99CC'
+      ],
+    }]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+      },
+      title: {
+        display: true,
+        font: {
+          size: 16
+        }
+      },
+      datalabels: {
+        color: '#fff',
+        font: {
+          weight: 'bold',
+          size: 14
+        },
+        formatter: (value) => {
+          return value;
+        }
+      }
+    }
+  };
+
+  return (
+    <Box>
+      <Typography variant="h5" sx={{ mb: 3 }}>Shop Analytics</Typography>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Most Viewed Products</Typography>
+            <Box sx={{ height: 300 }}>
+              <Pie data={mostViewedData} options={chartOptions} plugins={[ChartDataLabels]} />
+            </Box>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Most Sold Products</Typography>
+            <Box sx={{ height: 300 }}>
+              <Pie data={mostSoldData} options={chartOptions} plugins={[ChartDataLabels]} />
+            </Box>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>View Trend</Typography>
+            <Box sx={{ height: 300 }}>
+              <Pie data={viewTrendData} options={chartOptions} plugins={[ChartDataLabels]} />
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
 export default function ViewYourShop() {
   const { user } = useSelector((state) => state.auth);
   const { shop } = useSelector((state) => state.shop); 
@@ -1686,6 +1826,7 @@ export default function ViewYourShop() {
           <Tab label="View Shop" />
           <Tab label="View Vouchers" />
           <Tab label="Orders" />
+          <Tab label="Reports" />
         </Tabs>
       </Box>
       {activeTab === 0 && (
@@ -1960,6 +2101,10 @@ export default function ViewYourShop() {
             </TableContainer>
           )}
         </Box>
+      )}
+
+      {activeTab === 3 && (
+        <ReportsSection user={user} />
       )}
     </Box>
   );
