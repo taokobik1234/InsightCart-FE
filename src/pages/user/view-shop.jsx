@@ -410,7 +410,8 @@ const AddEditProductDialog = ({
   product_id,
   setProducts,
   shop,
-  product,setTotalpage,page
+  product,setTotalpage,page,setFetchPage,
+  productList 
 }) => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [formData, setFormData] = useState({
@@ -450,7 +451,7 @@ const AddEditProductDialog = ({
   };
 
   const handleSubmit = () => {
-    setWaitting(true) 
+     
     const requiredFields = [
       "media_ids",
       "category_ids",
@@ -490,6 +491,7 @@ const AddEditProductDialog = ({
       setTimeout(() => setMessage(""), 3000);
       return;
     }
+    setWaitting(true)  
     if (title == "Add Product") createProduct();
     else updateProduct();
   };
@@ -597,11 +599,14 @@ const AddEditProductDialog = ({
           .then((response) => response.json())  
           .then((response) => response.data);  
           setTotalpage(response2.meta.total_pages) 
+          if(productList.length%10==0) 
+            setFetchPage((prev) =>prev +1)
           setProducts((prev) => { 
             const newProduct = response2.products.find(product => product.id === newId);
            
             return newProduct ? [newProduct, ...prev] : prev;
           });
+           
       } catch (error) {
         console.log(error);
       } 
@@ -1421,7 +1426,7 @@ export default function ViewYourShop() {
   const navigate = useNavigate();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   const [categories, setCategories] = useState([]);
-  const [products, setproducts] = useState(undefined);
+  const [products, setproducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -1632,7 +1637,7 @@ export default function ViewYourShop() {
         )
           .then((response) => response.json())
           .then((response) => response.data);
-  
+           
         setproducts((prev) => [...prev, ...response.products]); // Append products to the previous ones
       } catch (error) {
         console.log(error);
@@ -1640,7 +1645,7 @@ export default function ViewYourShop() {
     };
   
     const fetchNextPages = async () => {
-      const totalPagesToFetch = Math.min(4, totalPage - fetchPage); // Ensure not fetching more than available pages
+      const totalPagesToFetch = Math.min(Math.abs(pageCount - fetchPage), totalPage - fetchPage);  
       for (let i = 1; i <= totalPagesToFetch; i++) {
         await fetchProduct2(fetchPage + i);
         setFetchpage((prev) => prev + 1);
@@ -1648,7 +1653,7 @@ export default function ViewYourShop() {
       }
     };
   
-    if (pageCount > 0 && fetchPage <= pageCount) {
+    if (pageCount > 0 && fetchPage <= totalPage && fetchPage <= pageCount +4 ) {
       fetchNextPages()
       .then(() => {
       setOnFetch(false);  
@@ -1658,7 +1663,8 @@ export default function ViewYourShop() {
       setOnFetch(false);  
     });  
     } 
-  }, [pageCount, fetchPage, shop, totalPage,]); 
+  }, [pageCount,  shop, totalPage,]); 
+  console.log(products)  
   if (!shop) return null;
   if (shop.is_verified === false)
     return (
@@ -1697,7 +1703,7 @@ export default function ViewYourShop() {
             button1={"Shop Details"}
             button2={"Add Product"}
           />
-          {products === undefined ?(
+          {products === null ?(
             <DotLoader></DotLoader>
           ) : (
             <ProductsTable
@@ -1715,7 +1721,8 @@ export default function ViewYourShop() {
             <Pagination pageCount={pageCount} setPageCount={setPageCount} totalPage={totalPage}></Pagination>
       
           <AddEditProductDialog
-            open={open}
+            open={open} 
+            productList ={products} 
             setTotalpage ={setTotalpage}
             title="Add Product"
             handleClose={() => setOpen(false)}
@@ -1723,10 +1730,11 @@ export default function ViewYourShop() {
             user={user}
             setProducts={setproducts}
             shop={shop}
+            setFetchPage={setFetchpage} 
           />
           <AddEditProductDialog
             open={edit}
-            page={pageCount} 
+            page={pageCount}  
             product={editProduct}
             product_id={editProductId}
             title="Edit Product"
