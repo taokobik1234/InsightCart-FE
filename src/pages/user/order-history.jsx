@@ -69,18 +69,31 @@ const OrderHistory = () => {
   }, [authUser, status]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Order History
-      </Typography>
-
-      <Box sx={{ mb: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 6, pl: { xs: 4, sm: 4, md: 4 }, pr: 4 }}>
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontWeight: 600,
+            color: '#1a237e'
+          }}
+        >
+          Order History
+        </Typography>
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Filter by Status</InputLabel>
           <Select
             value={status}
             label="Filter by Status"
             onChange={(e) => setStatus(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#1a237e',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#1a237e',
+              },
+            }}
           >
             {statusOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -91,45 +104,102 @@ const OrderHistory = () => {
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          borderRadius: 2,
+          overflow: 'hidden'
+        }}
+      >
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Order ID</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Products</TableCell>
-              <TableCell align="right">Total Price</TableCell>
+            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+              <TableCell sx={{ fontWeight: 600, py: 2 }}>Order ID</TableCell>
+              <TableCell sx={{ fontWeight: 600, py: 2 }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 600, py: 2 }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600, py: 2 }}>Products</TableCell>
+              <TableCell sx={{ fontWeight: 600, py: 2 }} align="right">Total Price</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.order_id}>
-                <TableCell>{order.order_id}</TableCell>
-                <TableCell>
+              <TableRow 
+                key={order.order_id}
+                sx={{ 
+                  '&:hover': { 
+                    backgroundColor: '#f8f8f8',
+                    transition: 'background-color 0.2s'
+                  }
+                }}
+              >
+                <TableCell sx={{ py: 2.5 }}>
+                  <Typography variant="body2" sx={{ color: '#1a237e', fontWeight: 500 }}>
+                    {order.order_id}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ py: 2.5 }}>
                   {format(new Date(order.created_at), 'MMM dd, yyyy HH:mm')}
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ py: 2.5 }}>
                   <Chip
                     label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     color={getStatusColor(order.status)}
                     size="small"
+                    sx={{ 
+                      fontWeight: 500,
+                      minWidth: 90,
+                      fontSize: '0.85rem'
+                    }}
                   />
                 </TableCell>
-                <TableCell>
-                  <ul className="list-disc pl-4">
+                <TableCell sx={{ py: 2.5 }}>
+                  <Box component="ul" sx={{ 
+                    listStyle: 'none',
+                    m: 0,
+                    p: 0
+                  }}>
                     {order.products.map((product) => (
-                      <li key={product.product_id}>
-                        {product.product_name} (x{product.quantity})
-                      </li>
+                      <Box 
+                        component="li" 
+                        key={product.product_id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          mb: 0.5,
+                          '&:last-child': { mb: 0 }
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {product.product_name}
+                          <Typography 
+                            component="span" 
+                            variant="body2" 
+                            sx={{ color: '#666', ml: 1 }}
+                          >
+                            (x{product.quantity})
+                          </Typography>
+                        </Typography>
+                      </Box>
                     ))}
-                  </ul>
+                  </Box>
                 </TableCell>
-                <TableCell align="right">
-                  ${order.total_price.toFixed(2)}
+                <TableCell align="right" sx={{ py: 2.5 }}>
+                  <Typography sx={{ fontWeight: 600, color: '#1a237e' }}>
+                    ${order.total_price.toFixed(2)}
+                  </Typography>
                 </TableCell>
               </TableRow>
             ))}
+            {orders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" sx={{ color: '#666' }}>
+                    No orders found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
